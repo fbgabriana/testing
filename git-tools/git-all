@@ -35,6 +35,7 @@ if [ "$exitcode" = "0" ]; then
 	fi
 
 else
+	echo "$fetch"
 	exit $exitcode
 fi
 
