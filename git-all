@@ -1,6 +1,6 @@
 #!/bin/sh
 if [ "$1" = "" ]; then
-	read -rp message
+	read -r -p message
 	if ! [ "$message" ]; then
 		message="Random update"
 	fi
