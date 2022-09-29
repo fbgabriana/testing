@@ -1,6 +1,6 @@
 #!/bin/sh
 if [ "$1" = "" ]; then
-	echo -n "Enter a message: "
+	echo -n "Please enter the commit message: "
 	read message
 	if ! [ "$message" ]; then
 		message="Random update"
