@@ -1,6 +1,6 @@
 #!/bin/sh
 
-fetch=$(git fetch --quiet)
+fetch=$(git fetch)
 
 exitcode="$?"
 if [ "$exitcode" = "0" ]; then
@@ -26,7 +26,9 @@ if [ "$exitcode" = "0" ]; then
 		commit=true
 	fi
 
-	git pull
+	if [ "$fetch" ]; then
+		git pull
+	fi
 
 	if [ "$commit" ]; then
 		git push
