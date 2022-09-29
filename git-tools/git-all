@@ -1,0 +1,34 @@
+#!/bin/sh
+
+git fetch --quiet
+
+exitcode="$?"
+if [ "$exitcode" = "0" ]; then
+
+	git status
+	git add -A
+
+	if ! ( git diff --quiet && git diff --staged --quiet ) ; then
+
+		if [ "$1" = "" ]; then
+			echo -n "Please enter the commit message: "
+			read message
+			if [ "$message" = "" ]; then
+				message="Random update"
+			fi
+		else
+			message="$@"
+		fi
+
+		echo "Adding commit \"$message\"..."
+		git commit -am "$message"
+
+	fi
+
+	git pull
+	git push
+
+else
+	exit $exitcode
+fi
+

@@ -1,0 +1,4 @@
+#!/bin/sh
+dest="$HOME/.local/bin/"
+cp git-all "$dest"
+cp git-set-token "$dest"
