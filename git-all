@@ -1,18 +1,20 @@
 #!/bin/sh
-if [ "$1" = "" ]; then
-	echo -n "Please enter the commit message: "
-	read message
-	if [ "$message" = "" ]; then
-		message="Random update"
-	fi
-else
-	message="$@"
-fi
 git fetch --quiet
 git status
 git add -A
 
 if ! ( git diff --quiet && git diff --staged --quiet ) ; then
+
+	if [ "$1" = "" ]; then
+		echo -n "Please enter the commit message: "
+		read message
+		if [ "$message" = "" ]; then
+			message="Random update"
+		fi
+	else
+		message="$@"
+	fi
+
 	echo
 	echo "Adding commit \"$message\"..."
 	git commit -am "$message"
