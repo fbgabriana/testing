@@ -1,6 +1,6 @@
 #!/bin/sh
 
-fetch=$(git fetch)
+fetch=$(git fetch 1>&2)
 
 exitcode="$?"
 if [ "$exitcode" = "0" ]; then
