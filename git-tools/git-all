@@ -26,9 +26,7 @@ if [ "$exitcode" = "0" ]; then
 		commit=true
 	fi
 
-	if [ "$fetch" ]; then
-		git pull
-	fi
+	git pull
 
 	if [ "$commit" ]; then
 		git push
