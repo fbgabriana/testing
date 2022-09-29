@@ -11,7 +11,13 @@ fi
 git fetch --quiet
 git status
 git add -A
-git diff --quiet && git diff --staged --quiet || (echo && echo "Adding commit \"$message\"..." && git commit -am "$message")
+
+if ! ( git diff --quiet && git diff --staged --quiet) ; then
+	echo
+	echo "Adding commit \"$message\"..."
+	git commit -am "$message"
+fi
+
 git pull
 git push
 
