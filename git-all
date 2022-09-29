@@ -1,0 +1,16 @@
+#!/bin/sh
+if [ "$1" = "" ]; then
+	read -rp message
+	if ! [ "$message" ]; then
+		message="Random update"
+	fi
+else
+	message="$@"
+fi
+git fetch --quiet
+git status
+git add -A
+git diff --quiet && git diff --staged --quiet || (echo && echo "Adding commit \"$message\"..." && git commit -am "$message")
+git pull
+git push
+
