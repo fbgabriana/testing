@@ -12,7 +12,7 @@ git fetch --quiet
 git status
 git add -A
 
-if ! [ git diff --quiet && git diff --staged --quiet ] ; then
+if ! ( git diff --quiet && git diff --staged --quiet ) ; then
 	echo
 	echo "Adding commit \"$message\"..."
 	git commit -am "$message"
