@@ -2,7 +2,7 @@
 if [ "$1" = "" ]; then
 	echo -n "Please enter the commit message: "
 	read message
-	if ! [ "$message" ]; then
+	if [ "$message" = "" ]; then
 		message="Random update"
 	fi
 else
