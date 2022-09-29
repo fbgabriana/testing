@@ -8,7 +8,7 @@ if [ "$exitcode" = "0" ]; then
 	git status
 	git add -A
 
-	if ! ( git diff --quiet && git diff --staged --quiet ) ; then
+	if ! ( git diff --quiet && git diff --quiet --staged ) ; then
 
 		if [ "$1" = "" ]; then
 			echo -n "Please enter the commit message: "
@@ -23,10 +23,14 @@ if [ "$exitcode" = "0" ]; then
 		echo "Adding commit \"$message\"..."
 		git commit -am "$message"
 
+		commit=true
 	fi
 
 	git pull
-	git push
+
+	if [ "$commit" ]; then
+		git push
+	fi
 
 else
 	exit $exitcode
