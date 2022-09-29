@@ -14,7 +14,7 @@ if [ "$exitcode" = "0" ]; then
 			echo -n "Please enter the commit message: "
 			read message
 			if [ "$message" = "" ]; then
-				message="Random update"
+				message="Random updates"
 			fi
 		else
 			message="$@"
