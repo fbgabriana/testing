@@ -1,0 +1,14 @@
+#!/bin/sh
+
+reponame="$@"
+while [ "$reponame" = "" ]; do
+	echo -n "Please enter a repository name: "
+	read reponame
+done
+reponame=$(echo $reponame | sed 's/ /-/g')
+
+git init
+git commit --allow-empty -m "New repository"
+git remote add origin https://github.com/fbgabriana/$reponame.git
+git push -u origin master
+
