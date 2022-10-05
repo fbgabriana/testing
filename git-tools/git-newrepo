@@ -5,7 +5,7 @@ while [ "$reponame" = "" ]; do
 	echo -n "Please enter a repository name: "
 	read reponame
 done
-reponame=$(sed 's/ /-/g' <<< $reponame)
+reponame=$(echo "$reponame" | sed 's/ /-/g')
 
 git init
 git commit --allow-empty -m "New repository"
