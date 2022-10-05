@@ -10,14 +10,13 @@ if [ "$exitcode" = "0" ]; then
 
 	if ! ( git diff --quiet && git diff --quiet --staged ) ; then
 
-		if [ "$1" = "" ]; then
+		message="$@"
+		if [ "$message" = "" ]; then
 			echo -n "Please enter the commit message: "
 			read message
 			if [ "$message" = "" ]; then
 				message="Random updates"
 			fi
-		else
-			message="$@"
 		fi
 
 		echo "Adding commit \"$message\"..."
