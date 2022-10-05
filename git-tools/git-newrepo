@@ -1,14 +1,17 @@
 #!/bin/sh
 
-reponame="$@"
-while [ "$reponame" = "" ]; do
-	echo -n "Please enter a repository name: "
-	read reponame
+repo_url="$@"
+while [ "$repo_url" = "" ]; do
+	echo -n "Please enter a repository URL: "
+	read repo_url
 done
-reponame=$(echo "$reponame" | sed 's/ /-/g')
+reponame=$(basename -s ".git" $repo_url)
 
-git init
-git commit --allow-empty -m "New repository"
-git remote add origin https://github.com/fbgabriana/$reponame.git
-git push -u origin master
+rm -rf "$reponame"
+git clone "$repo_url"
+cd "$reponame"
+if ! git rev-parse HEAD >/dev/null 2>&1; then
+	git commit --allow-empty -m "Initial commit"
+	git push
+fi
 
