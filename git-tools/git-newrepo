@@ -7,11 +7,22 @@ while [ "$repo_url" = "" ]; do
 done
 reponame=$(basename -s ".git" $repo_url)
 
-rm -rf "$reponame"
-git clone "$repo_url"
-cd "$reponame"
-if ! git rev-parse HEAD >/dev/null 2>&1; then
-	git commit --allow-empty -m "Initial commit"
-	git push
+rm -rf .git
+git init
+git remote add origin $repo_url
+
+branch=$(git remote show $repo_url | grep " HEAD branch: " | tr -s \ | sed "s/ HEAD branch: //")
+if [ $branch = "(unknown)" ]; then
+	branch="main"
 fi
+
+git commit --allow-empty -m "Initial commit"
+git branch -M $branch
+
+git remote update 2>/dev/null
+if git remote set-head origin -a >/dev/null 2>&1; then
+	git pull --rebase origin $branch
+fi
+
+git push -u origin $branch
 

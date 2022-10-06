@@ -1,0 +1,17 @@
+#!/bin/sh
+
+repo_url="$@"
+while [ "$repo_url" = "" ]; do
+	echo -n "Please enter a repository URL: "
+	read repo_url
+done
+reponame=$(basename -s ".git" $repo_url)
+
+rm -rf "$reponame"
+git clone "$repo_url"
+cd "$reponame"
+if ! git rev-parse HEAD >/dev/null 2>&1; then
+	git commit --allow-empty -m "Initial commit"
+	git push
+fi
+

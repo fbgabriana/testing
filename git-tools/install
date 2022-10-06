@@ -1,5 +1,5 @@
 #!/bin/sh
 cd "$(dirname $0)"
 dest="$HOME/.local/bin/"
-cp git-all git-set-token git-newrepo "$dest"
+cp git-* "$dest"
 
