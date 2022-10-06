@@ -10,7 +10,7 @@ reponame=$(basename -s ".git" $repo_url)
 rm -rf "$reponame"
 git clone "$repo_url"
 cd "$reponame"
-if ! git rev-parse 2>/dev/null; then
+if ! git rev-parse HEAD >/dev/null 2>&1; then
 	git commit --allow-empty -m "Initial commit"
 	git push
 fi
