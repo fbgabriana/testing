@@ -20,7 +20,7 @@ if [ "$exitcode" = "0" ]; then
 		fi
 
 		echo "Adding commit \"$message\"..."
-		git commit -am "$message"
+		git commit -m "$message"
 
 		commit=true
 	fi
