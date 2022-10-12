@@ -7,6 +7,11 @@ while [ "$repo_url" = "" ]; do
 done
 reponame=$(basename -s ".git" $repo_url)
 
+if [ -f "README.md" ]; then
+	tmpfile=$(mktemp)
+	mv "README.md" "$tmpfile"
+fi
+
 # Create a new local repository from scratch
 rm -rf .git
 git init
@@ -19,41 +24,36 @@ git remote add origin $repo_url
 
 # Find the name of remote branch
 branch=$(git remote show $repo_url | grep " HEAD branch: " | tr -s \ | sed "s/ HEAD branch: //")
+
+# Create an empty commit
+git commit --allow-empty -m "[Empty]"
+
 if [ $branch = "(unknown)" ]; then
 	# No content yet on remote branch
 
-	# Create an initial commit
-	git add -A
-	git commit --allow-empty -m "Initial commit"
-
-	# Find the name of the local branch
+	# Use the name of the local branch
 	branch="$(cat .git/HEAD | cut -d/ -f3)"
-
-	# Push to remote
-	git push --set-upstream origin $branch
 
 else
 	# The remote branch has content
 
-	# Create an initial commit
-	git add -A
-	git commit --allow-empty -m "First upload"
-
 	# Rename the local branch
 	git branch -M $branch
 
-	# Pull from remote
+	# Pull from remote, may overwrite local files
 	git remote update 2>/dev/null
 	if git remote set-head origin -a >/dev/null 2>&1; then
-		if git log -p | grep diff >/dev/null; then
-			git pull --rebase origin $branch -X theirs
-		else
-			git pull --rebase origin $branch
-		fi
+		git reset --hard origin/$branch >/dev/null
+		git pull --rebase origin $branch
 	fi
 
-	# Push to remote
-	git push --set-upstream origin $branch
+fi
 
+# Push to remote
+git push --set-upstream origin $branch
+
+if [ -f "$tmpfile" ]; then
+	mv "$tmpfile" "README.md"
+	rm -f "$tmpfile"
 fi
 
