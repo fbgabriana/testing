@@ -349,8 +349,11 @@
 	}
 
 	window.addEventListener("beforeunload", function(event) {
-		if (document.getElementById("noreload").checked) {
-			event.preventDefault();
+		if (event.cancelable) {
+			if (document.getElementById("noreload").checked) {
+				console.log(`${event.type} event is being cancelled`);
+				event.preventDefault();
+			}
 		}
 	});
 
