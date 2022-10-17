@@ -348,7 +348,7 @@
 		}
 	}
 
-	window.addEventListener("beforeunload", function(event) {
+	window.addEventListener("beforeunload", (event) => {
 		if (event.cancelable) {
 			if (document.getElementById("noreload").checked) {
 				console.log(`${event.type} event is being cancelled`);
