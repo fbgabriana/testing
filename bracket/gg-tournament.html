@@ -348,9 +348,8 @@
 		}
 	}
 
-	window.addEventListener("beforeunload", (event) => {
-		noreload = document.getElementById("noreload");
-		if (noreload.checked) {
+	window.addEventListener("beforeunload", function(event) {
+		if (document.getElementById("noreload").checked) {
 			event.preventDefault();
 		}
 	});
