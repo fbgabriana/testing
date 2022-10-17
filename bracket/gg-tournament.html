@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>PSHS Intramurals 2022: Game of the Generals</title>
+	<style>
+	body {
+		font-family: "Liberation Serif";
+		font-size: 10px;
+		margin: 1em;
+	}
+	header h1 {
+		font-size: 2em;
+		margin: 0.5em 0;
+	}
+	header h2 {
+		font-size: 1.5em;
+		margin: 0.5em 0;
+	}
+	canvas {
+		background-color: transparent;
+	}
+	.brackets {
+		position: absolute;
+		top: 5em;
+		margin: 0;
+	}
+	.bracket {
+		display: flex;
+		flex-direction: row;
+		margin: 1em 0;
+		gap: 2.5em;
+	}
+	.round {
+		display: flex;
+		flex-direction: column;
+		margin: auto 0;
+		gap: 1em;
+	}
+	.spacer, .match {
+		width: 10em;
+		height: 2em;
+	}
+	.match {
+		border: 1px solid gray;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		color: gray;
+		background-color: #f4f4f4;
+		cursor: default;
+		border-radius: 0.5em;
+		box-shadow: 0 1px 4px gray;
+		user-select: none;
+	}
+	.spacer {
+		border: 1px solid transparent;
+	}
+	.winners .round0 {
+		gap: calc(1em + 0px);
+	}
+	.winners .round1 {
+		gap: calc(4em + 2px);
+	}
+	.winners .round2 {
+		gap: calc(10em + 6px);
+	}
+	.winners .round3 {
+		gap: calc(22em + 14px);
+	}
+	.winners .round4 {
+		gap: calc(10em + 6px);
+	}
+	.winners .round5 {
+		gap: calc(10em + 6px);
+	}
+	.winners .round6 {
+		gap: calc(10em + 6px);
+	}
+	.losers .round1 {
+		gap: calc(1em + 0px);
+	}
+	.losers .round2 {
+		gap: calc(4em + 2px);
+	}
+	.losers .round3 {
+		gap: calc(4em + 2px);
+	}
+	.losers .round4 {
+		gap: calc(4em + 2px);
+	}
+	.losers .round5 {
+		gap: calc(16em + 10px);
+	}
+	.losers .round6 {
+		gap: calc(10em + 6px);
+	}
+	.losers .round7 {
+		gap: calc(10em + 6px);
+	}
+	.losers .round8 {
+		gap: calc(10em + 6px);
+	}
+	.classification {
+		position: absolute;
+		top: calc(52em + 2px);
+		margin: 0;
+		z-index: -1;
+	}
+	.get-winner {
+		position: fixed;
+		top: 1.5em;
+		left: 500px;
+		cursor: default;
+		font-size: 18px;
+		padding: 0.5em;
+		background-color: #ffffaa;
+		border: 1px solid gray;
+		border-radius: 0.5em;
+		box-shadow: 0 1px 4px gray;
+	}
+	.get-winner label {
+		padding-right: 0.5em;
+	}
+
+	</style>
+	<script src="playerlist.js"></script>
+	<script>
+	class Match {
+		constructor(id) {
+			this.id = id;
+		}
+		get element() {
+			return document.getElementById(this.id);
+		}
+		get style() {
+			return this.element.style;
+		}
+		get player0() {
+			return this;
+		}
+		get player1() {
+			return (this.element && this.element.dataset.player1) ? new Match(this.element.dataset.player1) : null;
+		}
+		get player2() {
+			return (this.element && this.element.dataset.player2) ? new Match(this.element.dataset.player2) : null;
+		}
+		get nextmatch() {
+			return (this.element && this.element.dataset.nextmatch) ? new Match(this.element.dataset.nextmatch) : null;
+		}
+		get losermatch() {
+			return new Match(this.loserid);
+		}
+		get loserid() {
+			return this.id.replace("match", "L");
+		}
+		get displayName() {
+			return (this.element) ? this.element.innerHTML : "";
+		}
+		set displayName(string) {
+			if (this.element) this.element.innerHTML = string;
+		}
+		get title() {
+			return (this.element) ? this.element.title : "";
+		}
+		set title(string) {
+			if (this.element) this.element.title = string;
+		}
+		get playercode() {
+			return (this.element && this.element.dataset && this.element.dataset.playercode) ? this.element.dataset.playercode : "";
+		}
+		set playercode(string) {
+			if (this.element) this.element.dataset.playercode = string;
+		}
+		getWinner() {
+			if (document.querySelector(".get-winner")) return;
+			if (this.player1.playercode.startsWith("match")) return;
+			if (this.player2.playercode.startsWith("match")) return;
+			if (this.player1.playercode.startsWith("L")) return;
+			if (this.player2.playercode.startsWith("L")) return;
+			if (this.nextmatch && ! this.nextmatch.playercode.startsWith("match")) return;
+			if (this.losermatch && this.losermatch.nextmatch && ! this.losermatch.nextmatch.playercode.startsWith("match")) return;
+			console.log(`playing ${this.id}: ${this.player1.displayName} (${this.player1.playercode}) vs. ${this.player2.displayName} (${this.player2.playercode})`);
+			const dialog = document.createElement("div");
+			dialog.classList.add("get-winner");
+			dialog.innerHTML = "\n \
+				Who won " + this.id + "?\n \
+				<form>\n \
+				<input id='player1' type='radio' name='getwinner' value='" + this.player1.displayName + "' data-playercode='" + this.player1.playercode + "'>\n \
+				<label for='player1'>" + this.player1.displayName + "</label>\n \
+				<input id='player2' type='radio' name='getwinner' value='" + this.player2.displayName + "' data-playercode='" + this.player2.playercode + "'>\n \
+				<label for='player2'>" + this.player2.displayName + "</label>\n \
+				<input id='nowinner' type='radio' name='getwinner' value='" + this.id + "'>\n \
+				<label for='nowinner'>No winner yet</label>\n \
+				<input id='closebutton' type='radio' name='getwinner' value='' style='display: none;'>\n \
+				<label for='closebutton'><sup style='position: absolute; right: 0.25em; top: 0.25em;'>❎</sup></label>\n \
+				</form>\n"
+			dialog.addEventListener("click", (event) => {
+				let winnerPlayerCode = "";
+				let loserPlayerCode = "";
+				let winnerDisplayName = "";
+				let loserDisplayName = "";
+				if (event.target == player1) {
+					winnerPlayerCode = player1.dataset.playercode;
+					loserPlayerCode = player2.dataset.playercode;
+					winnerDisplayName = player1.value;
+					loserDisplayName = player2.value;
+				}
+				if (event.target == player2) {
+					winnerPlayerCode = player2.dataset.playercode;
+					loserPlayerCode = player1.dataset.playercode;
+					winnerDisplayName = player2.value;
+					loserDisplayName = player1.value;
+				}
+				if (winnerPlayerCode) {
+					this.displayName = winnerDisplayName;
+					this.playercode = winnerPlayerCode;
+					this.losermatch.displayName = loserDisplayName;
+					this.losermatch.playercode = loserPlayerCode;
+					this.title = `${this.id}: ${this.playercode}`;
+					this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
+					console.log(`winner: ${this.displayName} (${this.playercode})`);
+					updateMatchInfo();
+					setTimeout(function() {document.body.removeChild(dialog);}, 50);
+				}
+				if (event.target == nowinner) {
+					this.displayName = this.id;
+					this.playercode = this.id;
+					this.losermatch.displayName = this.loserid;
+					this.losermatch.playercode = this.loserid;
+					this.title = "";
+					this.losermatch.title = "";
+					console.log("No winner yet");
+					updateMatchInfo();
+					setTimeout(function() {document.body.removeChild(dialog);}, 50);
+				}
+				if (event.target == closebutton) {
+					console.log("No action taken");
+					setTimeout(function() {document.body.removeChild(dialog);}, 50);
+				}
+			});
+			document.body.appendChild(dialog);
+		}
+	}
+
+	function updateMatchInfo() {
+		let matches = document.getElementsByClassName("match");
+		for (let i = 0; i < matches.length; i++) {
+			let match = new Match(matches[i].id);
+			if (match.playercode == "") {
+				match.playercode = match.id;
+				match.displayName = match.id;
+			}
+			if (match.displayName.startsWith('match')) {
+				match.style.fontWeight = "normal";
+				match.style.color = "gray";
+			}
+			else {
+				match.element.style.fontWeight = "bold";
+				switch (match.playercode.charAt(0)) {
+					case "R": match.style.color = "red"; break;
+					case "G": match.style.color = "darkorange"; break;
+					case "B": match.style.color = "blue"; break;
+					case "K": match.style.color = "black"; break;
+					case "L": match.style.color = "gray"; break;
+					default:  match.style.color = "lightgray"; break;
+				}
+			}
+		}
+	}
+
+	function addHandler() {
+		let matches = document.getElementsByClassName("match");
+		for (let i=0; i<matches.length; i++) {
+			matches[i].addEventListener("click", (event) => {
+				if (event.target.id.startsWith("match")) {
+					let match = new Match(event.target.id);
+					match.getWinner();
+				}
+			});
+		}
+	}
+
+	function drawtrees() {
+		const canvas = document.querySelector("canvas");
+		if (! canvas || ! canvas.getContext) return;
+
+		canvas.height = document.getElementsByClassName("brackets")[0].offsetHeight + document.getElementsByTagName("header")[0].offsetHeight + 32;
+		canvas.width = document.getElementsByClassName("brackets")[0].offsetWidth + 16;
+		canvas.style.position = "absolute";
+		canvas.style.top = "0";
+		canvas.style.left = "0";
+		canvas.style.zIndex = "-1";
+
+		const ctx = canvas.getContext('2d');
+
+		ctx.strokeStyle = "purple";
+		ctx.lineWidth = 1;
+		ctx.beginPath();
+		let matches = [];
+		for (let i = 1; i <= 31; i++) {
+			tree("match" + i);
+		}
+		ctx.stroke();
+
+		function tree(id) {
+			let match = new Match(id);
+			let r0 = match.player0.element.getBoundingClientRect();
+			let r1 = match.player1.element.getBoundingClientRect();
+			let r2 = match.player2.element.getBoundingClientRect();
+			x1 = r1.right + scrollX;
+			x2 = r2.right + scrollX; xm = Math.max(x1, x2);
+			w  = r0.left  + scrollX - xm;
+			y0 = r0.bottom - r0.height/2 + scrollY;
+			y1 = r1.bottom - r1.height/2 + scrollY;
+			y2 = r2.bottom - r2.height/2 + scrollY;
+			ctx.moveTo(xm + w/2, y1); ctx.lineTo(xm + w/2, y2);
+			ctx.moveTo(xm + w/2, y0); ctx.lineTo(xm + w  , y0);
+			ctx.moveTo(x1      , y1); ctx.lineTo(xm + w/2, y1);
+			ctx.moveTo(x2      , y2); ctx.lineTo(xm + w/2, y2);
+		}
+	}
+
+	function initialize() {
+		let matches = document.getElementsByClassName("player");
+		for (let i = 0; i < matches.length; i++) {
+			let match = new Match(matches[i].id);
+			match.title = match.playercode;
+			if (typeof players != "undefined") {
+				match.displayName = players[match.playercode];
+			}
+			else {
+				match.displayName = match.playercode;
+			}
+		}
+	}
+
+	window.addEventListener("beforeunload", (event) => {
+		event.preventDefault();
+	});
+
+	window.addEventListener("resize", (event) => {
+		drawtrees();
+	});
+
+	window.addEventListener("load", (event) => {
+		updateMatchInfo();
+		addHandler();
+		initialize();
+		drawtrees();
+	});
+
+	</script>
+</head>
+
+<body>
+<header>
+<h1>Game of the Generals</h1>
+<h2>16-player Double Elimination Tournament</h2>
+</header>
+
+<main>
+<div class="brackets">
+
+	<div class="winners bracket">
+
+		<div class="round round0">
+			<div class="match player" id="seed01" data-playercode="R1"></div>
+			<div class="match player" id="seed16" data-playercode="K4"></div>
+			<div class="match player" id="seed09" data-playercode="B3"></div>
+			<div class="match player" id="seed08" data-playercode="G2"></div>
+			<div class="match player" id="seed05" data-playercode="B2"></div>
+			<div class="match player" id="seed12" data-playercode="G3"></div>
+			<div class="match player" id="seed13" data-playercode="R4"></div>
+			<div class="match player" id="seed04" data-playercode="K1"></div>
+			<div class="match player" id="seed03" data-playercode="G1"></div>
+			<div class="match player" id="seed14" data-playercode="B4"></div>
+			<div class="match player" id="seed11" data-playercode="K3"></div>
+			<div class="match player" id="seed06" data-playercode="R2"></div>
+			<div class="match player" id="seed07" data-playercode="K2"></div>
+			<div class="match player" id="seed10" data-playercode="R3"></div>
+			<div class="match player" id="seed15" data-playercode="G4"></div>
+			<div class="match player" id="seed02" data-playercode="B1"></div>
+		</div>
+
+		<div class="round round1">
+			<div class="match" id="match1" data-player1="seed01" data-player2="seed16" data-nextmatch="match13"></div>
+			<div class="match" id="match2" data-player1="seed09" data-player2="seed08" data-nextmatch="match13"></div>
+			<div class="match" id="match3" data-player1="seed05" data-player2="seed12" data-nextmatch="match14"></div>
+			<div class="match" id="match4" data-player1="seed13" data-player2="seed04" data-nextmatch="match14"></div>
+			<div class="match" id="match5" data-player1="seed03" data-player2="seed14" data-nextmatch="match15"></div>
+			<div class="match" id="match6" data-player1="seed11" data-player2="seed06" data-nextmatch="match15"></div>
+			<div class="match" id="match7" data-player1="seed07" data-player2="seed10" data-nextmatch="match16"></div>
+			<div class="match" id="match8" data-player1="seed15" data-player2="seed02" data-nextmatch="match16"></div>
+		</div>
+
+		<div class="round">
+			<div class="spacer"></div>
+		</div>
+
+		<div class="round round2">
+			<div class="match" id="match13" data-player1="match1" data-player2="match2" data-nextmatch="match21"></div>
+			<div class="match" id="match14" data-player1="match3" data-player2="match4" data-nextmatch="match21"></div>
+			<div class="match" id="match15" data-player1="match5" data-player2="match6" data-nextmatch="match22"></div>
+			<div class="match" id="match16" data-player1="match7" data-player2="match8" data-nextmatch="match22"></div>
+		</div>
+
+		<div class="round round3">
+			<div class="match" id="match21" data-player1="match13" data-player2="match14" data-nextmatch="match27"></div>
+			<div class="match" id="match22" data-player1="match15" data-player2="match16" data-nextmatch="match27"></div>
+		</div>
+
+		<div class="round">
+			<div class="spacer"></div>
+		</div>
+
+		<div class="round round4">
+			<div class="match" id="match27" data-player1="match21" data-player2="match22" data-nextmatch="match30"></div>
+		</div>
+
+		<div class="round">
+			<div class="spacer"></div>
+		</div>
+
+		<div class="round round5">
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="match" id="match30" data-player1="match27" data-player2="match29" data-nextmatch="match31"></div>
+			<div class="match" id="L30" data-nextmatch="match31"></div>
+		</div>
+
+		<div class="round round6">
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="match" id="match31" data-player1="match30" data-player2="L30"></div>
+		</div>
+
+	</div>
+	<div class="losers bracket">
+
+		<div class="round">
+			<div class="spacer"></div>
+		</div>
+
+		<div class="round round1">
+			<div class="match" id="L1" data-nextmatch="match9"></div>
+			<div class="match" id="L2" data-nextmatch="match9"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="match" id="L3" data-nextmatch="match10"></div>
+			<div class="match" id="L4" data-nextmatch="match10"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="match" id="L5" data-nextmatch="match11"></div>
+			<div class="match" id="L6" data-nextmatch="match11"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="match" id="L7" data-nextmatch="match12"></div>
+			<div class="match" id="L8" data-nextmatch="match12"></div>
+		</div>
+
+		<div class="round round2">
+			<div class="match" id="match9" data-player1="L1" data-player2="L2" data-nextmatch="match17"></div>
+			<div class="match" id="L16" data-nextmatch="match17"></div>
+			<div class="match" id="L15" data-nextmatch="match18"></div>
+			<div class="match" id="match10" data-player1="L3" data-player2="L4" data-nextmatch="match18"></div>
+			<div class="spacer"></div>
+			<div class="match" id="match11" data-player1="L5" data-player2="L6" data-nextmatch="match19"></div>
+			<div class="match" id="L14" data-nextmatch="match19"></div>
+			<div class="match" id="L13" data-nextmatch="match20"></div>
+			<div class="match" id="match12" data-player1="L7" data-player2="L8" data-nextmatch="match20"></div>
+		</div>
+
+		<div class="round round3">
+			<div class="match" id="match17" data-player1="match9" data-player2="L16" data-nextmatch="match23"></div>
+			<div class="spacer"></div>
+			<div class="match" id="match18" data-player1="match10" data-player2="L15" data-nextmatch="match23"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="match" id="match19" data-player1="match11" data-player2="L14" data-nextmatch="match24"></div>
+			<div class="spacer"></div>
+			<div class="match" id="match20" data-player1="match12" data-player2="L13" data-nextmatch="match24"></div>
+		</div>
+
+		<div class="round round4">
+			<div class="match" id="match23" data-player1="match17" data-player2="match18" data-nextmatch="match25"></div>
+			<div class="spacer"></div>
+			<div class="match" id="L22" data-nextmatch="match25"></div>
+			<div class="match" id="L21" data-nextmatch="match26"></div>
+			<div class="spacer"></div>
+			<div class="match" id="match24" data-player1="match19" data-player2="match20" data-nextmatch="match26"></div>
+		</div>
+
+		<div class="round round5">
+			<div class="match" id="match25" data-player1="match23" data-player2="L22" data-nextmatch="match28"></div>
+			<div class="match" id="match26" data-player1="match24" data-player2="L21" data-nextmatch="match28"></div>
+		</div>
+
+		<div class="round round6">
+			<div class="match" id="L27" data-nextmatch="match29"></div>
+			<div class="match" id="match28" data-player1="match25" data-player2="match26" data-nextmatch="match29"></div>
+			<div class="spacer"></div>
+		</div>
+
+		<div class="round round7">
+			<div class="match" id="match29" data-player1="match28" data-player2="L27" data-nextmatch="match30"></div>
+			<div class="spacer"></div>
+		</div>
+
+	</div>
+
+	<div class="classification bracket">
+		<div class="round">
+			<div class="spacer"></div>
+		</div>
+		<div class="round">
+			<div class="spacer"></div>
+		</div>
+		<div class="round">
+			<div class="spacer"></div>
+		</div>
+		<div class="round">
+			<div class="spacer"></div>
+		</div>
+		<div class="round">
+			<div class="spacer"></div>
+		</div>
+		<div class="round">
+			<div class="spacer"></div>
+		</div>
+		<div class="round">
+			<div class="spacer"></div>
+		</div>
+		<div class="round">
+			<div class="spacer"></div>
+		</div>
+		<div class="round">
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="match" id="L29" data-finalrank="3rd Place"></div>
+			<div class="match" id="L28" data-finalrank="4th Place"></div>
+			<div class="match" id="L26" data-finalrank="5th Place"></div>
+			<div class="match" id="L25" data-finalrank="6th Place"></div>
+			<div class="match" id="L24" data-finalrank="7th Place"></div>
+			<div class="match" id="L23" data-finalrank="8th Place"></div>
+		</div>
+	</div>
+</div>
+<canvas></canvas>
+</main>
+
+</body>
+</html>
