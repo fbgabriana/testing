@@ -286,10 +286,12 @@
 
 	function drawtrees() {
 		const canvas = document.querySelector("canvas");
+		const brackets = document.querySelector(".brackets");
+
 		if (! canvas || ! canvas.getContext) return;
 
-		canvas.height = document.getElementsByClassName("brackets")[0].offsetHeight + document.getElementsByTagName("header")[0].offsetHeight + 32;
-		canvas.width = document.getElementsByClassName("brackets")[0].offsetWidth + 16;
+		canvas.height = brackets.offsetHeight + document.getElementsByTagName("header")[0].offsetHeight + 32;
+		canvas.width = brackets.offsetWidth + 16;
 		canvas.style.position = "absolute";
 		canvas.style.top = "0";
 		canvas.style.left = "0";
