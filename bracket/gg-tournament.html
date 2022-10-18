@@ -149,9 +149,6 @@
 		get style() {
 			return this.element.style;
 		}
-		get player0() {
-			return this;
-		}
 		get player1() {
 			return (this.element && this.element.dataset.player1) ? new Match(this.element.dataset.player1) : null;
 		}
@@ -258,9 +255,9 @@
 
 	function createAllMatches() {
 		let matches = new Object;
-		let matchElements = document.getElementsByClassName("match");
-		for (let i = 0; i < matchElements.length; i++) {
-			let id = matchElements[i].id;
+		let elements = document.getElementsByClassName("match");
+		for (let i = 0; i < elements.length; i++) {
+			let id = elements[i].id;
 			matches[id] = new Match(id);
 			matches[id].title = matches[id].playercode;
 			if (typeof playerlist == "object") {
@@ -337,7 +334,7 @@
 
 		function tree(id) {
 			let match = matches[id];
-			let r0 = match.player0.element.getBoundingClientRect();
+			let r0 = match.element.getBoundingClientRect();
 			let r1 = match.player1.element.getBoundingClientRect();
 			let r2 = match.player2.element.getBoundingClientRect();
 			x1 = r1.right + scrollX;
