@@ -255,9 +255,8 @@
 	}
 
 	function updateMatchInfo() {
-		let matches = document.getElementsByClassName("match");
-		for (let i = 0; i < matches.length; i++) {
-			let match = new Match(matches[i].id);
+		for (id in matches) {
+			let match = matches[id];
 			if (match.playercode == "") {
 				match.playercode = match.id;
 				match.displayName = match.id;
@@ -281,11 +280,10 @@
 	}
 
 	function addHandler() {
-		let matches = document.getElementsByClassName("match");
-		for (let i=0; i<matches.length; i++) {
-			matches[i].addEventListener("click", (event) => {
+		for (id in matches) {
+			let match = matches[id];
+			match.element.addEventListener("click", (event) => {
 				if (event.target.id.startsWith("match")) {
-					let match = new Match(event.target.id);
 					match.getWinner();
 				}
 			});
@@ -310,14 +308,16 @@
 		ctx.strokeStyle = "purple";
 		ctx.lineWidth = 1;
 		ctx.beginPath();
-		let matches = [];
-		for (let i = 1; i <= 31; i++) {
-			tree("match" + i);
+
+		for (id in matches) {
+			if (id.startsWith("match")) {
+				tree(id);
+			}
 		}
 		ctx.stroke();
 
 		function tree(id) {
-			let match = new Match(id);
+			let match = matches[id];
 			let r0 = match.player0.element.getBoundingClientRect();
 			let r1 = match.player1.element.getBoundingClientRect();
 			let r2 = match.player2.element.getBoundingClientRect();
@@ -335,9 +335,9 @@
 	}
 
 	function initialize() {
-		let matches = document.getElementsByClassName("player");
-		for (let i = 0; i < matches.length; i++) {
-			let match = new Match(matches[i].id);
+		let playerElements = document.getElementsByClassName("player");
+		for (let i = 0; i < playerElements.length; i++) {
+			let match = matches[playerElements[i].id];
 			match.title = match.playercode;
 			if (typeof players != "undefined") {
 				match.displayName = players[match.playercode];
@@ -346,6 +346,23 @@
 				match.displayName = match.playercode;
 			}
 		}
+	}
+
+	function createAllMatches() {
+		let matches = new Object;
+		let matchElements = document.getElementsByClassName("match");
+		for (let i = 0; i < matchElements.length; i++) {
+			let id = matchElements[i].id;
+			matches[id] = new Match(id);
+			matches[id].title = matches[id].playercode;
+			if (typeof players != "undefined") {
+				matches[id].displayName = players[matches[id].playercode];
+			}
+			else {
+				matches[id].displayName = matches[id].playercode;
+			}
+		}
+		return matches;
 	}
 
 	window.addEventListener("beforeunload", (event) => {
@@ -575,6 +592,8 @@
 	<input type="checkbox" id="noreload" checked><label for="noreload">Prevent reloading</label>
 </div>
 </main>
-
+<script>
+	var matches = createAllMatches();
+</script>
 </body>
 </html>
