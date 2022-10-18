@@ -135,7 +135,9 @@
 		font-size: 0.8rem;
 	}
 	</style>
+
 	<script src="playerlist.js"></script>
+
 	<script>
 	class Match {
 		constructor(id) {
@@ -254,6 +256,23 @@
 		}
 	}
 
+	function createAllMatches() {
+		let matches = new Object;
+		let matchElements = document.getElementsByClassName("match");
+		for (let i = 0; i < matchElements.length; i++) {
+			let id = matchElements[i].id;
+			matches[id] = new Match(id);
+			matches[id].title = matches[id].playercode;
+			if (typeof players != "undefined") {
+				matches[id].displayName = players[matches[id].playercode];
+			}
+			else {
+				matches[id].displayName = matches[id].playercode;
+			}
+		}
+		return matches;
+	}
+
 	function updateMatchInfo() {
 		for (id in matches) {
 			let match = matches[id];
@@ -279,7 +298,7 @@
 		}
 	}
 
-	function addHandler() {
+	function addHandlers() {
 		for (id in matches) {
 			let match = matches[id];
 			match.element.addEventListener("click", (event) => {
@@ -290,7 +309,7 @@
 		}
 	}
 
-	function drawtrees() {
+	function drawTrees() {
 		const canvas = document.querySelector("canvas");
 		const brackets = document.querySelector(".brackets");
 
@@ -335,39 +354,15 @@
 	}
 
 	function initialize() {
-		let playerElements = document.getElementsByClassName("player");
-		for (let i = 0; i < playerElements.length; i++) {
-			let match = matches[playerElements[i].id];
-			match.title = match.playercode;
-			if (typeof players != "undefined") {
-				match.displayName = players[match.playercode];
-			}
-			else {
-				match.displayName = match.playercode;
-			}
-		}
-	}
-
-	function createAllMatches() {
-		let matches = new Object;
-		let matchElements = document.getElementsByClassName("match");
-		for (let i = 0; i < matchElements.length; i++) {
-			let id = matchElements[i].id;
-			matches[id] = new Match(id);
-			matches[id].title = matches[id].playercode;
-			if (typeof players != "undefined") {
-				matches[id].displayName = players[matches[id].playercode];
-			}
-			else {
-				matches[id].displayName = matches[id].playercode;
-			}
-		}
-		return matches;
+		matches = createAllMatches();
+		updateMatchInfo();
+		addHandlers();
+		drawTrees();
 	}
 
 	window.addEventListener("beforeunload", (event) => {
-		if (event.cancelable) {
-			if (document.getElementById("noreload").checked) {
+		if (document.getElementById("noreload").checked) {
+			if (event.cancelable) {
 				console.log(`${event.type} event is being cancelled`);
 				event.preventDefault();
 			}
@@ -375,15 +370,14 @@
 	});
 
 	window.addEventListener("resize", (event) => {
-		drawtrees();
+		drawTrees();
 	});
 
 	window.addEventListener("load", (event) => {
-		updateMatchInfo();
-		addHandler();
 		initialize();
-		drawtrees();
 	});
+
+	var matches = {};
 
 	</script>
 </head>
@@ -592,8 +586,5 @@
 	<input type="checkbox" id="noreload" checked><label for="noreload">Prevent reloading</label>
 </div>
 </main>
-<script>
-	var matches = createAllMatches();
-</script>
 </body>
 </html>
