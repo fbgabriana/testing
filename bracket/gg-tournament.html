@@ -167,10 +167,10 @@
 		get loserid() {
 			return this.id.replace("match", "L");
 		}
-		get displayName() {
+		get text() {
 			return (this.element) ? this.element.innerHTML : "";
 		}
-		set displayName(string) {
+		set text(string) {
 			if (this.element) this.element.innerHTML = string;
 		}
 		get title() {
@@ -193,16 +193,16 @@
 			if (this.player2.playercode.startsWith("L")) return;
 			if (this.nextmatch && ! this.nextmatch.playercode.startsWith("match")) return;
 			if (this.losermatch && this.losermatch.nextmatch && ! this.losermatch.nextmatch.playercode.startsWith("match")) return;
-			console.log(`playing ${this.id}: ${this.player1.displayName} (${this.player1.playercode}) vs. ${this.player2.displayName} (${this.player2.playercode})`);
+			console.log(`playing ${this.id}: ${this.player1.text} (${this.player1.playercode}) vs. ${this.player2.text} (${this.player2.playercode})`);
 			const dialog = document.createElement("div");
 			dialog.classList.add("get-winner");
 			dialog.innerHTML = "\n \
 				Who won " + this.id + "?\n \
 				<form>\n \
-				<input id='player1' type='radio' name='getwinner' value='" + this.player1.displayName + "' data-playercode='" + this.player1.playercode + "'>\n \
-				<label for='player1'>" + this.player1.displayName + "</label>\n \
-				<input id='player2' type='radio' name='getwinner' value='" + this.player2.displayName + "' data-playercode='" + this.player2.playercode + "'>\n \
-				<label for='player2'>" + this.player2.displayName + "</label>\n \
+				<input id='player1' type='radio' name='getwinner' value='" + this.player1.text + "' data-playercode='" + this.player1.playercode + "'>\n \
+				<label for='player1'>" + this.player1.text + "</label>\n \
+				<input id='player2' type='radio' name='getwinner' value='" + this.player2.text + "' data-playercode='" + this.player2.playercode + "'>\n \
+				<label for='player2'>" + this.player2.text + "</label>\n \
 				<input id='nowinner' type='radio' name='getwinner' value='" + this.id + "'>\n \
 				<label for='nowinner'>No winner yet</label>\n \
 				<input id='closebutton' type='radio' name='getwinner' value='' style='display: none;'>\n \
@@ -211,35 +211,35 @@
 			dialog.addEventListener("click", (event) => {
 				let winnerPlayerCode = "";
 				let loserPlayerCode = "";
-				let winnerDisplayName = "";
-				let loserDisplayName = "";
+				let winnertext = "";
+				let losertext = "";
 				if (event.target == player1) {
 					winnerPlayerCode = player1.dataset.playercode;
 					loserPlayerCode = player2.dataset.playercode;
-					winnerDisplayName = player1.value;
-					loserDisplayName = player2.value;
+					winnertext = player1.value;
+					losertext = player2.value;
 				}
 				if (event.target == player2) {
 					winnerPlayerCode = player2.dataset.playercode;
 					loserPlayerCode = player1.dataset.playercode;
-					winnerDisplayName = player2.value;
-					loserDisplayName = player1.value;
+					winnertext = player2.value;
+					losertext = player1.value;
 				}
 				if (winnerPlayerCode) {
-					this.displayName = winnerDisplayName;
+					this.text = winnertext;
 					this.playercode = winnerPlayerCode;
-					this.losermatch.displayName = loserDisplayName;
+					this.losermatch.text = losertext;
 					this.losermatch.playercode = loserPlayerCode;
 					this.title = `${this.id}: ${this.playercode}`;
 					this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
-					console.log(`winner: ${this.displayName} (${this.playercode})`);
+					console.log(`winner: ${this.text} (${this.playercode})`);
 					updateMatchInfo();
 					setTimeout(function() {document.body.removeChild(dialog);}, 50);
 				}
 				if (event.target == nowinner) {
-					this.displayName = this.id;
+					this.text = this.id;
 					this.playercode = this.id;
-					this.losermatch.displayName = this.loserid;
+					this.losermatch.text = this.loserid;
 					this.losermatch.playercode = this.loserid;
 					this.title = "";
 					this.losermatch.title = "";
@@ -263,11 +263,11 @@
 			let id = matchElements[i].id;
 			matches[id] = new Match(id);
 			matches[id].title = matches[id].playercode;
-			if (typeof playerlist != "undefined") {
-				matches[id].displayName = playerlist[matches[id].playercode];
+			if (typeof playerlist == "object") {
+				matches[id].text = playerlist[matches[id].playercode];
 			}
 			else {
-				matches[id].displayName = matches[id].playercode;
+				matches[id].text = matches[id].playercode;
 			}
 		}
 		return matches;
@@ -278,9 +278,9 @@
 			let match = matches[id];
 			if (match.playercode == "") {
 				match.playercode = match.id;
-				match.displayName = match.id;
+				match.text = match.id;
 			}
-			if (match.displayName.startsWith('match')) {
+			if (match.text.startsWith('match')) {
 				match.style.fontWeight = "normal";
 				match.style.color = "gray";
 			}
