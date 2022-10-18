@@ -147,37 +147,37 @@
 			return document.getElementById(this.id);
 		}
 		get style() {
-			return this.element.style;
+			return this.element && this.element.style;
 		}
 		get player1() {
-			return (this.element && this.element.dataset.player1) ? new Match(this.element.dataset.player1) : null;
+			return this.element && matches[this.element.dataset.player1] || null;
 		}
 		get player2() {
-			return (this.element && this.element.dataset.player2) ? new Match(this.element.dataset.player2) : null;
+			return this.element && matches[this.element.dataset.player2] || null;
 		}
 		get nextmatch() {
-			return (this.element && this.element.dataset.nextmatch) ? new Match(this.element.dataset.nextmatch) : null;
+			return this.element && matches[this.element.dataset.nextmatch] || null;
 		}
 		get losermatch() {
-			return new Match(this.loserid);
+			return matches[this.loserid] || null;
 		}
 		get loserid() {
 			return this.id.replace("match", "L");
 		}
 		get text() {
-			return (this.element) ? this.element.innerHTML : "";
+			return this.element && this.element.innerHTML || "";
 		}
 		set text(string) {
 			if (this.element) this.element.innerHTML = string;
 		}
 		get title() {
-			return (this.element) ? this.element.title : "";
+			return this.element && this.element.title || "";
 		}
 		set title(string) {
 			if (this.element) this.element.title = string;
 		}
 		get playercode() {
-			return (this.element && this.element.dataset && this.element.dataset.playercode) ? this.element.dataset.playercode : "";
+			return this.element && this.element.dataset.playercode || "";
 		}
 		set playercode(string) {
 			if (this.element) this.element.dataset.playercode = string;
@@ -225,10 +225,12 @@
 				if (winnercode) {
 					this.text = winnertext;
 					this.playercode = winnercode;
-					this.losermatch.text = losertext;
-					this.losermatch.playercode = losercode;
 					this.title = `${this.id}: ${this.playercode}`;
-					this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
+					if (this.losermatch) {
+						this.losermatch.text = losertext;
+						this.losermatch.playercode = losercode;
+						this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
+					}
 					console.log(`winner: ${this.text} (${this.playercode})`);
 					updateMatchInfo();
 					setTimeout(function() {document.body.removeChild(dialog);}, 50);
@@ -236,10 +238,12 @@
 				if (event.target == nowinner) {
 					this.text = this.id;
 					this.playercode = this.id;
-					this.losermatch.text = this.loserid;
-					this.losermatch.playercode = this.loserid;
 					this.title = "";
-					this.losermatch.title = "";
+					if (this.losermatch) {
+						this.losermatch.text = this.loserid;
+						this.losermatch.playercode = this.loserid;
+						this.losermatch.title = "";
+					}
 					console.log("No winner yet");
 					updateMatchInfo();
 					setTimeout(function() {document.body.removeChild(dialog);}, 50);
