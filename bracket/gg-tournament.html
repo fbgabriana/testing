@@ -206,27 +206,27 @@
 				<label for='closebutton'><sup style='position: absolute; right: 0.25em; top: 0.25em;'>❎</sup></label>\n \
 				</form>\n"
 			dialog.addEventListener("click", (event) => {
-				let winnerPlayerCode = "";
-				let loserPlayerCode = "";
+				let winnercode = "";
+				let losercode = "";
 				let winnertext = "";
 				let losertext = "";
 				if (event.target == player1) {
-					winnerPlayerCode = player1.dataset.playercode;
-					loserPlayerCode = player2.dataset.playercode;
+					winnercode = player1.dataset.playercode;
+					losercode = player2.dataset.playercode;
 					winnertext = player1.value;
 					losertext = player2.value;
 				}
 				if (event.target == player2) {
-					winnerPlayerCode = player2.dataset.playercode;
-					loserPlayerCode = player1.dataset.playercode;
+					winnercode = player2.dataset.playercode;
+					losercode = player1.dataset.playercode;
 					winnertext = player2.value;
 					losertext = player1.value;
 				}
-				if (winnerPlayerCode) {
+				if (winnercode) {
 					this.text = winnertext;
-					this.playercode = winnerPlayerCode;
+					this.playercode = winnercode;
 					this.losermatch.text = losertext;
-					this.losermatch.playercode = loserPlayerCode;
+					this.losermatch.playercode = losercode;
 					this.title = `${this.id}: ${this.playercode}`;
 					this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
 					console.log(`winner: ${this.text} (${this.playercode})`);
