@@ -263,8 +263,8 @@
 			let id = matchElements[i].id;
 			matches[id] = new Match(id);
 			matches[id].title = matches[id].playercode;
-			if (typeof players != "undefined") {
-				matches[id].displayName = players[matches[id].playercode];
+			if (typeof playerlist != "undefined") {
+				matches[id].displayName = playerlist[matches[id].playercode];
 			}
 			else {
 				matches[id].displayName = matches[id].playercode;

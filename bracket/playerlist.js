@@ -1,4 +1,4 @@
-var players =
+var playerlist =
 
 // The following data is in Javascript Object Notation format.
 // They are given as name-value pairs separated by a colon.
