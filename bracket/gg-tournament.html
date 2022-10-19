@@ -111,9 +111,9 @@
 		z-index: -1;
 	}
 	.get-winner {
+		display: block;
 		position: fixed;
 		top: 1.5em;
-		left: 500px;
 		cursor: default;
 		font-size: 18px;
 		padding: 0.5em;
@@ -162,7 +162,7 @@
 			return matches[this.loserid] || null;
 		}
 		get loserid() {
-			return this.id.replace("match", "L");
+			return this.id.startsWith("match") && this.id.replace("match", "L") || "";
 		}
 		get text() {
 			return this.element && this.element.innerHTML || "";
@@ -191,14 +191,14 @@
 			if (this.nextmatch && ! this.nextmatch.playercode.startsWith("match")) return;
 			if (this.losermatch && this.losermatch.nextmatch && ! this.losermatch.nextmatch.playercode.startsWith("match")) return;
 			console.log(`playing ${this.id}: ${this.player1.text} (${this.player1.playercode}) vs. ${this.player2.text} (${this.player2.playercode})`);
-			const dialog = document.createElement("div");
+			const dialog = document.createElement("dialog");
 			dialog.classList.add("get-winner");
 			dialog.innerHTML = "\n \
 				Who won " + this.id + "?\n \
 				<form>\n \
-				<input id='player1' type='radio' name='getwinner' value='" + this.player1.text + "' data-playercode='" + this.player1.playercode + "'>\n \
+				<input id='player1' type='radio' name='getwinner' value='" + this.player1.playercode + "'>\n \
 				<label for='player1'>" + this.player1.text + "</label>\n \
-				<input id='player2' type='radio' name='getwinner' value='" + this.player2.text + "' data-playercode='" + this.player2.playercode + "'>\n \
+				<input id='player2' type='radio' name='getwinner' value='" + this.player2.playercode + "'>\n \
 				<label for='player2'>" + this.player2.text + "</label>\n \
 				<input id='nowinner' type='radio' name='getwinner' value='" + this.id + "'>\n \
 				<label for='nowinner'>No winner yet</label>\n \
@@ -211,16 +211,16 @@
 				let winnertext = "";
 				let losertext = "";
 				if (event.target == player1) {
-					winnercode = player1.dataset.playercode;
-					losercode = player2.dataset.playercode;
-					winnertext = player1.value;
-					losertext = player2.value;
+					winnercode = player1.value;
+					losercode = player2.value;
+					winnertext = player1.labels[0].innerText;
+					losertext = player2.labels[0].innerText;
 				}
 				if (event.target == player2) {
-					winnercode = player2.dataset.playercode;
-					losercode = player1.dataset.playercode;
-					winnertext = player2.value;
-					losertext = player1.value;
+					winnercode = player2.value;
+					losercode = player1.value;
+					winnertext = player2.labels[0].innerText;
+					losertext = player1.labels[0].innerText;
 				}
 				if (winnercode) {
 					this.text = winnertext;
@@ -257,7 +257,7 @@
 		}
 	}
 
-	function createAllMatches() {
+	let createAllMatches = () => {
 		let matches = new Object;
 		let elements = document.getElementsByClassName("match");
 		for (let i = 0; i < elements.length; i++) {
@@ -274,7 +274,7 @@
 		return matches;
 	}
 
-	function updateMatchInfo() {
+	let updateMatchInfo = () => {
 		for (id in matches) {
 			let match = matches[id];
 			if (match.playercode == "") {
@@ -299,7 +299,7 @@
 		}
 	}
 
-	function addHandlers() {
+	let addHandlers = () => {
 		for (id in matches) {
 			let match = matches[id];
 			match.element.addEventListener("click", (event) => {
@@ -310,7 +310,7 @@
 		}
 	}
 
-	function drawTrees() {
+	let drawTrees = () => {
 		const canvas = document.querySelector("canvas");
 		const brackets = document.querySelector(".brackets");
 
@@ -329,14 +329,7 @@
 		ctx.lineWidth = 1;
 		ctx.beginPath();
 
-		for (id in matches) {
-			if (id.startsWith("match")) {
-				tree(id);
-			}
-		}
-		ctx.stroke();
-
-		function tree(id) {
+		let tree = (id) => {
 			let match = matches[id];
 			let r0 = match.element.getBoundingClientRect();
 			let r1 = match.player1.element.getBoundingClientRect();
@@ -352,9 +345,16 @@
 			ctx.moveTo(x1      , y1); ctx.lineTo(xm + w/2, y1);
 			ctx.moveTo(x2      , y2); ctx.lineTo(xm + w/2, y2);
 		}
+
+		for (id in matches) {
+			if (id.startsWith("match")) {
+				tree(id);
+			}
+		}
+		ctx.stroke();
 	}
 
-	function initialize() {
+	let initialize = () => {
 		matches = createAllMatches();
 		updateMatchInfo();
 		addHandlers();
