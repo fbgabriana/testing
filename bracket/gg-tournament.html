@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>PSHS Intramurals 2022: Game of the Generals</title>
+	<title>PSHS-CARC Intramurals 2022: Game of the Generals</title>
 	<style>
 	body {
 		font-family: "Liberation Serif";
@@ -25,7 +25,7 @@
 	}
 	.brackets {
 		position: absolute;
-		top: 6em;
+		top: 80px;
 		margin: 0;
 	}
 	.bracket {
@@ -75,10 +75,10 @@
 		gap: calc(10em + 6px);
 	}
 	.winners .round5 {
-		gap: calc(10em + 6px);
+		gap: calc(18em + 0px);
 	}
 	.winners .round6 {
-		gap: calc(10em + 6px);
+		gap: calc(21em + 5px);
 	}
 	.losers .round1 {
 		gap: calc(1em + 0px);
@@ -102,18 +102,12 @@
 		gap: calc(10em + 6px);
 	}
 	.losers .round8 {
-		gap: calc(10em + 6px);
-	}
-	.classification {
-		position: absolute;
-		top: calc(52em + 2px);
-		margin: 0;
-		z-index: -1;
+		gap: calc(1em + 0px);
 	}
 	.get-match-winner {
 		display: block;
 		position: fixed;
-		top: 1.5em;
+		top: 2em;
 		cursor: default;
 		font-size: 18px;
 		padding: 0.5em;
@@ -121,6 +115,7 @@
 		border: 1px solid gray;
 		border-radius: 0.5em;
 		box-shadow: 0 1px 4px gray;
+		user-select: none;
 	}
 	.get-match-winner label {
 		padding-right: 0.5em;
@@ -128,9 +123,6 @@
 	.get-match-winner fieldset {
 		border-radius: 0.5em;
 		margin-right: 0.5em;
-	}
-	.get-match-winner input[type="radio"] {
-		outline: none;
 	}
 	.get-match-winner .closebutton {
 		position: absolute;
@@ -219,6 +211,7 @@
 			if (this.player2.playercode.startsWith("L")) return;
 			if (this.nextmatch && ! this.nextmatch.playercode.startsWith("match")) return;
 			if (this.losermatch && this.losermatch.nextmatch && ! this.losermatch.nextmatch.playercode.startsWith("match")) return;
+			if (this.id == "match31" && this.player1.playercode == this.player1.player1.playercode) return;
 			console.log(`playing ${this.id}: ${this.player1.text} (${this.player1.playercode}) vs. ${this.player2.text} (${this.player2.playercode})`);
 
 			const dialog = document.createElement("dialog");
@@ -235,7 +228,7 @@
 				<label for='radio_nowinner'>No winner yet</label>\n \
 				</fieldset>\n \
 				</form>\n \
-				<button id='closebutton' class='closebutton'>✕</button>"
+				<button id='closebutton' class='closebutton'>✕</button>\n"
 			dialog.addEventListener("click", (event) => {
 				if (event.target === radio_player1) {
 					this.playercode = this.player1.playercode;
@@ -281,9 +274,8 @@
 					dialog.close();
 				}
 			});
-			document.body.appendChild(dialog);
 			dialog.close = () => { setTimeout(() => {document.body.removeChild(dialog)}, 60) }
-			dialog.show();
+			document.body.appendChild(dialog);
 		}
 	}
 
@@ -312,6 +304,11 @@
 					match.playercode = match.id;
 					match.text = match.id;
 				}
+				if (match.element.dataset.finalrank) {
+					if (match.title.startsWith(match.id)) {
+						match.title = `${match.id}:${match.playercode} (${match.element.dataset.finalrank})`;
+					}
+				}
 				if (match.text.startsWith('match')) {
 					match.style.fontWeight = "normal";
 					match.style.color = "gray";
@@ -335,12 +332,13 @@
 
 			if (! canvas || ! canvas.getContext) return;
 
-			canvas.height = brackets.offsetHeight + document.getElementsByTagName("header")[0].offsetHeight + 32;
-			canvas.width = brackets.offsetWidth + 16;
 			canvas.style.position = "absolute";
 			canvas.style.top = "0";
 			canvas.style.left = "0";
 			canvas.style.zIndex = "-1";
+
+			canvas.height = brackets.offsetHeight + document.querySelector("header").offsetHeight;
+			canvas.width  = brackets.offsetWidth;
 
 			const ctx = canvas.getContext('2d');
 
@@ -373,7 +371,7 @@
 			}
 			ctx.stroke();
 		}
-		addHandlers() {
+		#addHandlers() {
 			for (let id in this.matches) {
 				let match = this.matches[id];
 				match.element.addEventListener("click", (event) => {
@@ -387,7 +385,7 @@
 			this.matches = this.createAllMatches();
 			this.updateMatchInfo();
 			this.drawNodes();
-			this.addHandlers();
+			this.#addHandlers();
 			return this.matches;
 		}
 	}
@@ -415,7 +413,7 @@
 
 <body>
 <header>
-<h1>PSHS Intramurals 2022: Game of the Generals</h1>
+<h1>PSHS-CARC Intramurals 2022: Game of the Generals</h1>
 <h2>16-player Double Elimination Tournament</h2>
 </header>
 
@@ -485,13 +483,10 @@
 		<div class="round round5">
 			<div class="spacer"></div>
 			<div class="spacer"></div>
-			<div class="spacer"></div>
 			<div class="match" id="match30" data-player1="match27" data-player2="match29" data-nextmatch="match31"></div>
-			<div class="match" id="L30" data-nextmatch="match31"></div>
 		</div>
 
 		<div class="round round6">
-			<div class="spacer"></div>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
 			<div class="match" id="match31" data-player1="match30" data-player2="L30"></div>
@@ -573,35 +568,8 @@
 			<div class="spacer"></div>
 		</div>
 
-	</div>
-
-	<div class="classification bracket">
-		<div class="round">
-			<div class="spacer"></div>
-		</div>
-		<div class="round">
-			<div class="spacer"></div>
-		</div>
-		<div class="round">
-			<div class="spacer"></div>
-		</div>
-		<div class="round">
-			<div class="spacer"></div>
-		</div>
-		<div class="round">
-			<div class="spacer"></div>
-		</div>
-		<div class="round">
-			<div class="spacer"></div>
-		</div>
-		<div class="round">
-			<div class="spacer"></div>
-		</div>
-		<div class="round">
-			<div class="spacer"></div>
-		</div>
-		<div class="round">
-			<div class="spacer"></div>
+		<div class="round round8">
+			<div class="match" id="L30" data-nextmatch="match31"></div>
 			<div class="spacer"></div>
 			<div class="match" id="L29" data-finalrank="3rd Place"></div>
 			<div class="match" id="L28" data-finalrank="4th Place"></div>
@@ -609,7 +577,19 @@
 			<div class="match" id="L25" data-finalrank="6th Place"></div>
 			<div class="match" id="L24" data-finalrank="7th Place"></div>
 			<div class="match" id="L23" data-finalrank="8th Place"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
+			<div class="spacer"></div>
 		</div>
+
 	</div>
 </div>
 <canvas></canvas>
