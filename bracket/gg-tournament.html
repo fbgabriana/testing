@@ -110,7 +110,7 @@
 		margin: 0;
 		z-index: -1;
 	}
-	.get-winner {
+	.get-match-winner {
 		display: block;
 		position: fixed;
 		top: 1.5em;
@@ -122,8 +122,27 @@
 		border-radius: 0.5em;
 		box-shadow: 0 1px 4px gray;
 	}
-	.get-winner label {
+	.get-match-winner label {
 		padding-right: 0.5em;
+	}
+	.get-match-winner fieldset {
+		border-radius: 0.5em;
+		margin-right: 0.5em;
+	}
+	.get-match-winner .closebutton {
+		position: absolute;
+		right: 0.25em;
+		top: 0.25em;
+		font-size: 12px;
+		margin: 2px;
+		padding: 0;
+		border: none;
+		background-color: transparent;
+	}
+	.get-match-winner .closebutton:active {
+		text-shadow: 0 0 1px gray;
+		font-size: 10px;
+		padding: 0 1px 1px 0;
 	}
 	.settings {
 		position: absolute;
@@ -182,8 +201,8 @@
 		set playercode(string) {
 			if (this.element) this.element.dataset.playercode = string;
 		}
-		getWinner() {
-			if (document.querySelector(".get-winner")) return;
+		getMatchWinner() {
+			if (document.querySelector("dialog.get-match-winner")) return;
 			if (this.player1.playercode.startsWith("match")) return;
 			if (this.player2.playercode.startsWith("match")) return;
 			if (this.player1.playercode.startsWith("L")) return;
@@ -192,65 +211,63 @@
 			if (this.losermatch && this.losermatch.nextmatch && ! this.losermatch.nextmatch.playercode.startsWith("match")) return;
 			console.log(`playing ${this.id}: ${this.player1.text} (${this.player1.playercode}) vs. ${this.player2.text} (${this.player2.playercode})`);
 			const dialog = document.createElement("dialog");
-			dialog.classList.add("get-winner");
+			dialog.classList.add("get-match-winner");
 			dialog.innerHTML = "\n \
-				Who won " + this.id + "?\n \
 				<form>\n \
-				<input id='player1' type='radio' name='getwinner' value='" + this.player1.playercode + "'>\n \
-				<label for='player1'>" + this.player1.text + "</label>\n \
-				<input id='player2' type='radio' name='getwinner' value='" + this.player2.playercode + "'>\n \
-				<label for='player2'>" + this.player2.text + "</label>\n \
-				<input id='nowinner' type='radio' name='getwinner' value='" + this.id + "'>\n \
-				<label for='nowinner'>No winner yet</label>\n \
-				<input id='closebutton' type='radio' name='getwinner' value='' style='display: none;'>\n \
-				<label for='closebutton'><sup style='position: absolute; right: 0.25em; top: 0.25em;'>❎</sup></label>\n \
-				</form>\n"
+				<fieldset>\n \
+				<legend>Who won " + this.id + "?</legend>\n \
+				<input id='radio_player1' type='radio'>\n \
+				<label for='radio_player1'>" + this.player1.text + "</label>\n \
+				<input id='radio_player2' type='radio'>\n \
+				<label for='radio_player2'>" + this.player2.text + "</label>\n \
+				<input id='radio_nowinner' type='radio'>\n \
+				<label for='radio_nowinner'>No winner yet</label>\n \
+				</fieldset>\n \
+				</form>\n \
+				<button id='closebutton' class='closebutton'>✕</button>"
 			dialog.addEventListener("click", (event) => {
-				let winnercode = "";
-				let losercode = "";
-				let winnertext = "";
-				let losertext = "";
-				if (event.target == player1) {
-					winnercode = player1.value;
-					losercode = player2.value;
-					winnertext = player1.labels[0].innerText;
-					losertext = player2.labels[0].innerText;
-				}
-				if (event.target == player2) {
-					winnercode = player2.value;
-					losercode = player1.value;
-					winnertext = player2.labels[0].innerText;
-					losertext = player1.labels[0].innerText;
-				}
-				if (winnercode) {
-					this.text = winnertext;
-					this.playercode = winnercode;
+				if (event.target === radio_player1) {
+					this.playercode = this.player1.playercode;
+					this.text = this.player1.text;
 					this.title = `${this.id}: ${this.playercode}`;
 					if (this.losermatch) {
-						this.losermatch.text = losertext;
-						this.losermatch.playercode = losercode;
+						this.losermatch.playercode = this.player2.playercode;
+						this.losermatch.text = this.player2.text;
 						this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
 					}
 					console.log(`winner: ${this.text} (${this.playercode})`);
 					updateMatchInfo();
-					setTimeout(function() {document.body.removeChild(dialog);}, 50);
+					setTimeout(() => {document.body.removeChild(dialog)}, 60);
 				}
-				if (event.target == nowinner) {
-					this.text = this.id;
+				if (event.target === radio_player2) {
+					this.playercode = this.player2.playercode;
+					this.text = this.player2.text;
+					this.title = `${this.id}: ${this.playercode}`;
+					if (this.losermatch) {
+						this.losermatch.playercode = this.player1.playercode;
+						this.losermatch.text = this.player1.text;
+						this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
+					}
+					console.log(`winner: ${this.text} (${this.playercode})`);
+					updateMatchInfo();
+					setTimeout(() => {document.body.removeChild(dialog)}, 60);
+				}
+				if (event.target === radio_nowinner) {
 					this.playercode = this.id;
+					this.text = this.id;
 					this.title = "";
 					if (this.losermatch) {
-						this.losermatch.text = this.loserid;
 						this.losermatch.playercode = this.loserid;
+						this.losermatch.text = this.loserid;
 						this.losermatch.title = "";
 					}
-					console.log("No winner yet");
+					console.log(`${radio_nowinner.labels[0].innerText}`);
 					updateMatchInfo();
-					setTimeout(function() {document.body.removeChild(dialog);}, 50);
+					setTimeout(() => {document.body.removeChild(dialog)}, 60);
 				}
-				if (event.target == closebutton) {
+				if (event.target === closebutton) {
 					console.log("No action taken");
-					setTimeout(function() {document.body.removeChild(dialog);}, 50);
+					setTimeout(() => {document.body.removeChild(dialog)}, 60);
 				}
 			});
 			document.body.appendChild(dialog);
@@ -274,7 +291,7 @@
 		return matches;
 	}
 
-	let updateMatchInfo = () => {
+	function updateMatchInfo() {
 		for (id in matches) {
 			let match = matches[id];
 			if (match.playercode == "") {
@@ -299,18 +316,18 @@
 		}
 	}
 
-	let addHandlers = () => {
+	function addHandlers() {
 		for (id in matches) {
 			let match = matches[id];
 			match.element.addEventListener("click", (event) => {
 				if (event.target.id.startsWith("match")) {
-					match.getWinner();
+					match.getMatchWinner();
 				}
 			});
 		}
 	}
 
-	let drawTrees = () => {
+	function drawTrees() {
 		const canvas = document.querySelector("canvas");
 		const brackets = document.querySelector(".brackets");
 
@@ -354,7 +371,7 @@
 		ctx.stroke();
 	}
 
-	let initialize = () => {
+	function initialize() {
 		matches = createAllMatches();
 		updateMatchInfo();
 		addHandlers();
