@@ -51,9 +51,9 @@
 		align-items: center;
 		color: gray;
 		background-color: #f4f4f4;
-		cursor: default;
 		border-radius: 0.5em;
 		box-shadow: 0 1px 4px gray;
+		cursor: default;
 		user-select: none;
 	}
 	.spacer {
@@ -129,20 +129,30 @@
 		border-radius: 0.5em;
 		margin-right: 0.5em;
 	}
+	.get-match-winner input[type="radio"] {
+		outline: none;
+	}
 	.get-match-winner .closebutton {
 		position: absolute;
 		right: 0.25em;
 		top: 0.25em;
 		font-size: 12px;
+		font-weight: bold;
 		margin: 2px;
 		padding: 0;
 		border: none;
 		background-color: transparent;
+		opacity: 0.8;
+	}
+	.get-match-winner .closebutton:hover {
+		text-shadow: 0 0 1px gray;
+		opacity: 1.0;
 	}
 	.get-match-winner .closebutton:active {
 		text-shadow: 0 0 1px gray;
 		font-size: 10px;
 		padding: 0 1px 1px 0;
+		opacity: 1.0;
 	}
 	.settings {
 		position: absolute;
@@ -169,19 +179,25 @@
 			return this.element && this.element.style;
 		}
 		get player1() {
-			return this.element && matches[this.element.dataset.player1] || null;
+			return this.element && tournament.matches[this.element.dataset.player1] || null;
 		}
 		get player2() {
-			return this.element && matches[this.element.dataset.player2] || null;
+			return this.element && tournament.matches[this.element.dataset.player2] || null;
 		}
 		get nextmatch() {
-			return this.element && matches[this.element.dataset.nextmatch] || null;
+			return this.element && tournament.matches[this.element.dataset.nextmatch] || null;
 		}
 		get losermatch() {
-			return matches[this.loserid] || null;
+			return tournament.matches[this.loserid] || null;
 		}
 		get loserid() {
 			return this.id.startsWith("match") && this.id.replace("match", "L") || "";
+		}
+		get playercode() {
+			return this.element && this.element.dataset.playercode || "";
+		}
+		set playercode(string) {
+			if (this.element) this.element.dataset.playercode = string;
 		}
 		get text() {
 			return this.element && this.element.innerHTML || "";
@@ -195,12 +211,6 @@
 		set title(string) {
 			if (this.element) this.element.title = string;
 		}
-		get playercode() {
-			return this.element && this.element.dataset.playercode || "";
-		}
-		set playercode(string) {
-			if (this.element) this.element.dataset.playercode = string;
-		}
 		getMatchWinner() {
 			if (document.querySelector("dialog.get-match-winner")) return;
 			if (this.player1.playercode.startsWith("match")) return;
@@ -210,17 +220,18 @@
 			if (this.nextmatch && ! this.nextmatch.playercode.startsWith("match")) return;
 			if (this.losermatch && this.losermatch.nextmatch && ! this.losermatch.nextmatch.playercode.startsWith("match")) return;
 			console.log(`playing ${this.id}: ${this.player1.text} (${this.player1.playercode}) vs. ${this.player2.text} (${this.player2.playercode})`);
+
 			const dialog = document.createElement("dialog");
 			dialog.classList.add("get-match-winner");
 			dialog.innerHTML = "\n \
-				<form>\n \
+				<form method='dialog'>\n \
 				<fieldset>\n \
 				<legend>Who won " + this.id + "?</legend>\n \
-				<input id='radio_player1' type='radio'>\n \
+				<input id='radio_player1' type='radio' name='match-winner'>\n \
 				<label for='radio_player1'>" + this.player1.text + "</label>\n \
-				<input id='radio_player2' type='radio'>\n \
+				<input id='radio_player2' type='radio' name='match-winner'>\n \
 				<label for='radio_player2'>" + this.player2.text + "</label>\n \
-				<input id='radio_nowinner' type='radio'>\n \
+				<input id='radio_nowinner' type='radio' name='match-winner'>\n \
 				<label for='radio_nowinner'>No winner yet</label>\n \
 				</fieldset>\n \
 				</form>\n \
@@ -236,8 +247,8 @@
 						this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
 					}
 					console.log(`winner: ${this.text} (${this.playercode})`);
-					updateMatchInfo();
-					setTimeout(() => {document.body.removeChild(dialog)}, 60);
+					tournament.updateMatchInfo();
+					dialog.close();
 				}
 				if (event.target === radio_player2) {
 					this.playercode = this.player2.playercode;
@@ -249,8 +260,8 @@
 						this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
 					}
 					console.log(`winner: ${this.text} (${this.playercode})`);
-					updateMatchInfo();
-					setTimeout(() => {document.body.removeChild(dialog)}, 60);
+					tournament.updateMatchInfo();
+					dialog.close();
 				}
 				if (event.target === radio_nowinner) {
 					this.playercode = this.id;
@@ -262,120 +273,123 @@
 						this.losermatch.title = "";
 					}
 					console.log(`${radio_nowinner.labels[0].innerText}`);
-					updateMatchInfo();
-					setTimeout(() => {document.body.removeChild(dialog)}, 60);
+					tournament.updateMatchInfo();
+					dialog.close();
 				}
 				if (event.target === closebutton) {
 					console.log("No action taken");
-					setTimeout(() => {document.body.removeChild(dialog)}, 60);
+					dialog.close();
 				}
 			});
 			document.body.appendChild(dialog);
+			dialog.close = () => { setTimeout(() => {document.body.removeChild(dialog)}, 60) }
+			dialog.show();
 		}
 	}
 
-	let createAllMatches = () => {
-		let matches = new Object;
-		let elements = document.getElementsByClassName("match");
-		for (let i = 0; i < elements.length; i++) {
-			let id = elements[i].id;
-			matches[id] = new Match(id);
-			matches[id].title = matches[id].playercode;
-			if (typeof playerlist == "object") {
-				matches[id].text = playerlist[matches[id].playercode];
+	class Tournament {
+		constructor() {}
+		createAllMatches() {
+			let matches = new Object;
+			let elements = document.getElementsByClassName("match");
+			for (let i = 0; i < elements.length; i++) {
+				let id = elements[i].id;
+				matches[id] = new Match(id);
+				matches[id].title = matches[id].playercode;
+				if (typeof playerlist == "object") {
+					matches[id].text = playerlist[matches[id].playercode];
+				}
+				else {
+					matches[id].text = matches[id].playercode;
+				}
 			}
-			else {
-				matches[id].text = matches[id].playercode;
-			}
+			return matches;
 		}
-		return matches;
-	}
-
-	function updateMatchInfo() {
-		for (id in matches) {
-			let match = matches[id];
-			if (match.playercode == "") {
-				match.playercode = match.id;
-				match.text = match.id;
-			}
-			if (match.text.startsWith('match')) {
-				match.style.fontWeight = "normal";
-				match.style.color = "gray";
-			}
-			else {
-				match.element.style.fontWeight = "bold";
-				switch (match.playercode.charAt(0)) {
-					case "R": match.style.color = "red"; break;
-					case "G": match.style.color = "darkorange"; break;
-					case "B": match.style.color = "blue"; break;
-					case "K": match.style.color = "black"; break;
-					case "L": match.style.color = "gray"; break;
-					default:  match.style.color = "lightgray"; break;
+		updateMatchInfo() {
+			for (let id in this.matches) {
+				let match = this.matches[id];
+				if (match.playercode == "") {
+					match.playercode = match.id;
+					match.text = match.id;
+				}
+				if (match.text.startsWith('match')) {
+					match.style.fontWeight = "normal";
+					match.style.color = "gray";
+				}
+				else {
+					match.element.style.fontWeight = "bold";
+					switch (match.playercode.charAt(0)) {
+						case "R": match.style.color = "red"; break;
+						case "G": match.style.color = "darkorange"; break;
+						case "B": match.style.color = "blue"; break;
+						case "K": match.style.color = "black"; break;
+						case "L": match.style.color = "gray"; break;
+						default:  match.style.color = "lightgray"; break;
+					}
 				}
 			}
 		}
-	}
+		drawNodes() {
+			const canvas = document.querySelector("canvas");
+			const brackets = document.querySelector(".brackets");
 
-	function addHandlers() {
-		for (id in matches) {
-			let match = matches[id];
-			match.element.addEventListener("click", (event) => {
-				if (event.target.id.startsWith("match")) {
-					match.getMatchWinner();
+			if (! canvas || ! canvas.getContext) return;
+
+			canvas.height = brackets.offsetHeight + document.getElementsByTagName("header")[0].offsetHeight + 32;
+			canvas.width = brackets.offsetWidth + 16;
+			canvas.style.position = "absolute";
+			canvas.style.top = "0";
+			canvas.style.left = "0";
+			canvas.style.zIndex = "-1";
+
+			const ctx = canvas.getContext('2d');
+
+			ctx.strokeStyle = "purple";
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+
+			let drawNode = (id) => {
+				let match = this.matches[id];
+				let r0 = match.element.getBoundingClientRect();
+				let r1 = match.player1.element.getBoundingClientRect();
+				let r2 = match.player2.element.getBoundingClientRect();
+				let x1 = r1.right + scrollX;
+				let x2 = r2.right + scrollX;
+				let xm = Math.max(x1, x2);
+				let w  = r0.left  + scrollX - xm;
+				let y0 = r0.bottom - r0.height/2 + scrollY;
+				let y1 = r1.bottom - r1.height/2 + scrollY;
+				let y2 = r2.bottom - r2.height/2 + scrollY;
+				ctx.moveTo(xm + w/2, y1); ctx.lineTo(xm + w/2, y2);
+				ctx.moveTo(xm + w/2, y0); ctx.lineTo(xm + w  , y0);
+				ctx.moveTo(x1      , y1); ctx.lineTo(xm + w/2, y1);
+				ctx.moveTo(x2      , y2); ctx.lineTo(xm + w/2, y2);
+			}
+
+			for (let id in this.matches) {
+				if (id.startsWith("match")) {
+					drawNode(id);
 				}
-			});
+			}
+			ctx.stroke();
 		}
-	}
-
-	function drawTrees() {
-		const canvas = document.querySelector("canvas");
-		const brackets = document.querySelector(".brackets");
-
-		if (! canvas || ! canvas.getContext) return;
-
-		canvas.height = brackets.offsetHeight + document.getElementsByTagName("header")[0].offsetHeight + 32;
-		canvas.width = brackets.offsetWidth + 16;
-		canvas.style.position = "absolute";
-		canvas.style.top = "0";
-		canvas.style.left = "0";
-		canvas.style.zIndex = "-1";
-
-		const ctx = canvas.getContext('2d');
-
-		ctx.strokeStyle = "purple";
-		ctx.lineWidth = 1;
-		ctx.beginPath();
-
-		let tree = (id) => {
-			let match = matches[id];
-			let r0 = match.element.getBoundingClientRect();
-			let r1 = match.player1.element.getBoundingClientRect();
-			let r2 = match.player2.element.getBoundingClientRect();
-			x1 = r1.right + scrollX;
-			x2 = r2.right + scrollX; xm = Math.max(x1, x2);
-			w  = r0.left  + scrollX - xm;
-			y0 = r0.bottom - r0.height/2 + scrollY;
-			y1 = r1.bottom - r1.height/2 + scrollY;
-			y2 = r2.bottom - r2.height/2 + scrollY;
-			ctx.moveTo(xm + w/2, y1); ctx.lineTo(xm + w/2, y2);
-			ctx.moveTo(xm + w/2, y0); ctx.lineTo(xm + w  , y0);
-			ctx.moveTo(x1      , y1); ctx.lineTo(xm + w/2, y1);
-			ctx.moveTo(x2      , y2); ctx.lineTo(xm + w/2, y2);
-		}
-
-		for (id in matches) {
-			if (id.startsWith("match")) {
-				tree(id);
+		addHandlers() {
+			for (let id in this.matches) {
+				let match = this.matches[id];
+				match.element.addEventListener("click", (event) => {
+					if (event.target.id.startsWith("match")) {
+						match.getMatchWinner();
+					}
+				});
 			}
 		}
-		ctx.stroke();
-	}
-
-	function initialize() {
-		matches = createAllMatches();
-		updateMatchInfo();
-		addHandlers();
-		drawTrees();
+		initialize() {
+			this.matches = this.createAllMatches();
+			this.updateMatchInfo();
+			this.drawNodes();
+			this.addHandlers();
+			return this.matches;
+		}
 	}
 
 	window.addEventListener("beforeunload", (event) => {
@@ -388,11 +402,12 @@
 	});
 
 	window.addEventListener("resize", (event) => {
-		drawTrees();
+		tournament.drawNodes();
 	});
 
 	window.addEventListener("load", (event) => {
-		initialize();
+		tournament = new Tournament();
+		tournament.initialize();
 	});
 
 	</script>
@@ -405,7 +420,7 @@
 </header>
 
 <main>
-<div class="brackets">
+<div class="tournament brackets">
 
 	<div class="winners bracket">
 
