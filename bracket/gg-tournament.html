@@ -242,7 +242,6 @@
 					}
 					console.log(`winner: ${this.text} (${this.playercode})`);
 					tournament.updateMatchInfo();
-					dialog.close();
 					if (this.id == "match30") {
 						this.nextmatch.element.style.textDecoration = "purple wavy line-through";
 						this.title = `${this.id}: ${this.playercode} (1st Place)`;
@@ -253,6 +252,7 @@
 						this.player1.title = `${this.player1.id}: ${this.player1.playercode}`;
 						this.player2.title = `${this.player2.id}: ${this.player2.playercode} (2nd Place)`;
 					}
+					dialog.close();
 					break;
 				case radio_player2:
 					this.playercode = this.player2.playercode;
@@ -265,7 +265,6 @@
 					}
 					console.log(`winner: ${this.text} (${this.playercode})`);
 					tournament.updateMatchInfo();
-					dialog.close();
 					if (this.id == "match30") {
 						this.nextmatch.element.style.textDecoration = "none";
 					}
@@ -274,6 +273,7 @@
 						this.player1.title = `${this.player1.id}: ${this.player1.playercode} (2nd Place)`;
 						this.player2.title = `${this.player2.id}: ${this.player2.playercode}`;
 					}
+					dialog.close();
 					break;
 				case radio_nowinner:
 					this.playercode = this.id;
@@ -286,7 +286,6 @@
 					}
 					console.log(`${radio_nowinner.labels[0].innerText}`);
 					tournament.updateMatchInfo();
-					dialog.close();
 					if (this.id == "match30") {
 						this.nextmatch.element.style.textDecoration = "none";
 					}
@@ -294,6 +293,7 @@
 						this.player1.title = `${this.player1.id}: ${this.player1.playercode}`;
 						this.player2.title = `${this.player2.id}: ${this.player2.playercode}`;
 					}
+					dialog.close();
 					break;
 				case closebutton:
 					console.log("No action taken");
