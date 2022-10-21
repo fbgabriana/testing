@@ -230,7 +230,8 @@
 				</form>\n \
 				<button id='closebutton' class='closebutton'>✕</button>\n"
 			dialog.addEventListener("click", (event) => {
-				if (event.target === radio_player1) {
+				switch (event.target) {
+				case radio_player1:
 					this.playercode = this.player1.playercode;
 					this.text = this.player1.text;
 					this.title = `${this.id}: ${this.playercode}`;
@@ -242,8 +243,18 @@
 					console.log(`winner: ${this.text} (${this.playercode})`);
 					tournament.updateMatchInfo();
 					dialog.close();
-				}
-				if (event.target === radio_player2) {
+					if (this.id == "match30") {
+						this.nextmatch.element.style.textDecoration = "purple wavy line-through";
+						this.title = `${this.id}: ${this.playercode} (1st Place)`;
+						this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode} (2nd Place)`;
+					}
+					if (this.id == "match31") {
+						this.title = `${this.id}: ${this.playercode} (1st Place)`;
+						this.player1.title = `${this.player1.id}: ${this.player1.playercode}`;
+						this.player2.title = `${this.player2.id}: ${this.player2.playercode} (2nd Place)`;
+					}
+					break;
+				case radio_player2:
 					this.playercode = this.player2.playercode;
 					this.text = this.player2.text;
 					this.title = `${this.id}: ${this.playercode}`;
@@ -255,8 +266,16 @@
 					console.log(`winner: ${this.text} (${this.playercode})`);
 					tournament.updateMatchInfo();
 					dialog.close();
-				}
-				if (event.target === radio_nowinner) {
+					if (this.id == "match30") {
+						this.nextmatch.element.style.textDecoration = "none";
+					}
+					if (this.id == "match31") {
+						this.title = `${this.id}: ${this.playercode} (1st Place)`;
+						this.player1.title = `${this.player1.id}: ${this.player1.playercode} (2nd Place)`;
+						this.player2.title = `${this.player2.id}: ${this.player2.playercode}`;
+					}
+					break;
+				case radio_nowinner:
 					this.playercode = this.id;
 					this.text = this.id;
 					this.title = "";
@@ -268,10 +287,19 @@
 					console.log(`${radio_nowinner.labels[0].innerText}`);
 					tournament.updateMatchInfo();
 					dialog.close();
-				}
-				if (event.target === closebutton) {
+					if (this.id == "match30") {
+						this.nextmatch.element.style.textDecoration = "none";
+					}
+					if (this.id == "match31") {
+						this.player1.title = `${this.player1.id}: ${this.player1.playercode}`;
+						this.player2.title = `${this.player2.id}: ${this.player2.playercode}`;
+					}
+					break;
+				case closebutton:
 					console.log("No action taken");
 					dialog.close();
+					break;
+				default:
 				}
 			});
 			dialog.close = () => { setTimeout(() => {document.body.removeChild(dialog)}, 60) }
