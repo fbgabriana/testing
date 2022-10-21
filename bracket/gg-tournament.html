@@ -399,7 +399,7 @@
 			}
 			ctx.stroke();
 		}
-		#addHandlers() {
+		#defineHandlers() {
 			for (let id in this.matches) {
 				let match = this.matches[id];
 				match.element.addEventListener("click", (event) => {
@@ -413,7 +413,7 @@
 			this.matches = this.createAllMatches();
 			this.updateMatchInfo();
 			this.drawNodes();
-			this.#addHandlers();
+			this.#defineHandlers();
 			return this.matches;
 		}
 	}
