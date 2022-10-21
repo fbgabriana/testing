@@ -23,16 +23,11 @@
 	canvas {
 		background-color: transparent;
 	}
-	.brackets {
-		position: absolute;
-		top: 80px;
-		margin: 0;
-	}
 	.bracket {
 		display: flex;
 		flex-direction: row;
-		margin: 1em 0;
 		gap: 2.5em;
+		margin: 1em 0;
 	}
 	.round {
 		display: flex;
@@ -40,12 +35,14 @@
 		margin: auto 0;
 		gap: 1em;
 	}
-	.spacer, .match {
-		width: 10em;
+	.match, .spacer {
+		box-sizing: border-box;
+		width: 11em;
 		height: 2em;
 	}
 	.match {
 		border: 1px solid gray;
+		font-size: 1em;
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -56,58 +53,54 @@
 		cursor: default;
 		user-select: none;
 	}
-	.spacer {
-		border: 1px solid transparent;
-	}
 	.winners .round0 {
-		gap: calc(1em + 0px);
+		gap: 1em;
 	}
 	.winners .round1 {
-		gap: calc(4em + 2px);
+		gap: 4em;
 	}
 	.winners .round2 {
-		gap: calc(10em + 6px);
+		gap: 10em;
 	}
 	.winners .round3 {
-		gap: calc(22em + 14px);
+		gap: 22em;
 	}
 	.winners .round4 {
-		gap: calc(10em + 6px);
+		gap: 0em;
 	}
 	.winners .round5 {
-		gap: calc(18em + 0px);
+		gap: 36em;
 	}
 	.winners .round6 {
-		gap: calc(21em + 5px);
+		gap: 42em;
 	}
 	.losers .round1 {
-		gap: calc(1em + 0px);
+		gap: 1em;
 	}
 	.losers .round2 {
-		gap: calc(4em + 2px);
+		gap: 4em;
 	}
 	.losers .round3 {
-		gap: calc(4em + 2px);
+		gap: 4em;
 	}
 	.losers .round4 {
-		gap: calc(4em + 2px);
+		gap: 4em;
 	}
 	.losers .round5 {
-		gap: calc(16em + 10px);
+		gap: 16em;
 	}
 	.losers .round6 {
-		gap: calc(10em + 6px);
+		gap: 10em;
 	}
 	.losers .round7 {
-		gap: calc(10em + 6px);
+		gap: 10em;
 	}
 	.losers .round8 {
-		gap: calc(1em + 0px);
+		gap: 1em;
 	}
 	.get-match-winner {
 		display: block;
 		position: fixed;
-		top: 2em;
 		cursor: default;
 		font-size: 18px;
 		padding: 0.5em;
@@ -135,6 +128,7 @@
 		border: none;
 		background-color: transparent;
 		opacity: 0.8;
+		outline: none;
 	}
 	.get-match-winner .closebutton:hover {
 		text-shadow: 0 0 1px gray;
@@ -163,9 +157,9 @@
 	class Match {
 		constructor(id) {
 			this.id = id;
+			this.winner = {};
+			this.loser = {};
 		}
-		winner = {};
-		loser = {};
 		get element() {
 			return document.getElementById(this.id);
 		}
@@ -222,6 +216,7 @@
 			const dialog = document.createElement("dialog");
 			dialog.classList.add("get-match-winner");
 			dialog.innerHTML = "\n \
+				<button id='closebutton' class='closebutton'>✕</button>\n \
 				<form method='dialog'>\n \
 				<fieldset>\n \
 				<legend>Who won " + this.id + "?</legend>\n \
@@ -232,8 +227,7 @@
 				<input id='radio_nowinner' type='radio' name='match-winner'>\n \
 				<label for='radio_nowinner'>No winner yet</label>\n \
 				</fieldset>\n \
-				</form>\n \
-				<button id='closebutton' class='closebutton'>✕</button>\n"
+				</form>\n"
 			dialog.addEventListener("click", (event) => {
 				switch (event.target) {
 				case radio_player1:
@@ -242,7 +236,7 @@
 					if (this.id == "match30") {
 						this.finalrank = "1st";
 						this.losermatch.finalrank = "2nd";
-						this.nextmatch.element.style.textDecoration = "purple wavy line-through";
+						this.nextmatch.element.style.textDecoration = "purple line-through";
 					}
 					if (this.id == "match31") {
 						this.player1.finalrank = "";
@@ -285,14 +279,17 @@
 					dialog.close();
 					break;
 				case closebutton:
-					console.log("No action taken");
+					console.log(`No action taken`);
 					dialog.close();
 					break;
 				default:
 				}
 			});
-			dialog.close = () => { setTimeout(() => {document.body.removeChild(dialog)}, 60) }
+			dialog.addEventListener("close", (event) => {
+				setTimeout(() => {document.body.removeChild(dialog)}, 60)
+			});
 			document.body.appendChild(dialog);
+			dialog.showModal();
 		}
 	}
 
@@ -354,12 +351,12 @@
 			if (! canvas || ! canvas.getContext) return;
 
 			canvas.style.position = "absolute";
-			canvas.style.top = "0";
-			canvas.style.left = "0";
+			canvas.style.top = brackets.offsetTop + "px";
+			canvas.style.left = brackets.offsetLeft + "px";
+			canvas.height = brackets.offsetHeight;
+			canvas.width  = brackets.offsetWidth;
 			canvas.style.zIndex = "-1";
 
-			canvas.height = brackets.offsetHeight + document.querySelector("header").offsetHeight;
-			canvas.width  = brackets.offsetWidth;
 
 			const ctx = canvas.getContext('2d');
 
@@ -369,16 +366,18 @@
 
 			let drawNode = (id) => {
 				let match = this.matches[id];
+				let offsetX = brackets.offsetLeft - scrollX;
+				let offsetY = brackets.offsetTop - scrollY;
 				let r0 = match.element.getBoundingClientRect();
 				let r1 = match.player1.element.getBoundingClientRect();
 				let r2 = match.player2.element.getBoundingClientRect();
-				let x1 = r1.right + scrollX;
-				let x2 = r2.right + scrollX;
+				let x1 = r1.right - offsetX;
+				let x2 = r2.right - offsetX;
 				let xm = Math.max(x1, x2);
-				let w  = r0.left  + scrollX - xm;
-				let y0 = r0.bottom - r0.height/2 + scrollY;
-				let y1 = r1.bottom - r1.height/2 + scrollY;
-				let y2 = r2.bottom - r2.height/2 + scrollY;
+				let w  = r0.left - xm - offsetX;
+				let y0 = r0.bottom - r0.height/2 - offsetY;
+				let y1 = r1.bottom - r1.height/2 - offsetY;
+				let y2 = r2.bottom - r2.height/2 - offsetY;
 				ctx.moveTo(xm + w/2, y1); ctx.lineTo(xm + w/2, y2);
 				ctx.moveTo(xm + w/2, y0); ctx.lineTo(xm + w  , y0);
 				ctx.moveTo(x1      , y1); ctx.lineTo(xm + w/2, y1);
@@ -444,33 +443,33 @@
 	<div class="winners bracket">
 
 		<div class="round round0">
-			<div class="match player" id="seed01" data-playercode="R1"></div>
-			<div class="match player" id="seed16" data-playercode="K4"></div>
-			<div class="match player" id="seed09" data-playercode="B3"></div>
-			<div class="match player" id="seed08" data-playercode="G2"></div>
-			<div class="match player" id="seed05" data-playercode="B2"></div>
-			<div class="match player" id="seed12" data-playercode="G3"></div>
-			<div class="match player" id="seed13" data-playercode="R4"></div>
-			<div class="match player" id="seed04" data-playercode="K1"></div>
-			<div class="match player" id="seed03" data-playercode="G1"></div>
-			<div class="match player" id="seed14" data-playercode="B4"></div>
-			<div class="match player" id="seed11" data-playercode="K3"></div>
-			<div class="match player" id="seed06" data-playercode="R2"></div>
-			<div class="match player" id="seed07" data-playercode="K2"></div>
-			<div class="match player" id="seed10" data-playercode="R3"></div>
-			<div class="match player" id="seed15" data-playercode="G4"></div>
-			<div class="match player" id="seed02" data-playercode="B1"></div>
+			<button class="match player" id="seed01" data-playercode="R1"></button>
+			<button class="match player" id="seed16" data-playercode="K4"></button>
+			<button class="match player" id="seed09" data-playercode="B3"></button>
+			<button class="match player" id="seed08" data-playercode="G2"></button>
+			<button class="match player" id="seed05" data-playercode="B2"></button>
+			<button class="match player" id="seed12" data-playercode="G3"></button>
+			<button class="match player" id="seed13" data-playercode="R4"></button>
+			<button class="match player" id="seed04" data-playercode="K1"></button>
+			<button class="match player" id="seed03" data-playercode="G1"></button>
+			<button class="match player" id="seed14" data-playercode="B4"></button>
+			<button class="match player" id="seed11" data-playercode="K3"></button>
+			<button class="match player" id="seed06" data-playercode="R2"></button>
+			<button class="match player" id="seed07" data-playercode="K2"></button>
+			<button class="match player" id="seed10" data-playercode="R3"></button>
+			<button class="match player" id="seed15" data-playercode="G4"></button>
+			<button class="match player" id="seed02" data-playercode="B1"></button>
 		</div>
 
 		<div class="round round1">
-			<div class="match" id="match1" data-player1="seed01" data-player2="seed16" data-nextmatch="match13"></div>
-			<div class="match" id="match2" data-player1="seed09" data-player2="seed08" data-nextmatch="match13"></div>
-			<div class="match" id="match3" data-player1="seed05" data-player2="seed12" data-nextmatch="match14"></div>
-			<div class="match" id="match4" data-player1="seed13" data-player2="seed04" data-nextmatch="match14"></div>
-			<div class="match" id="match5" data-player1="seed03" data-player2="seed14" data-nextmatch="match15"></div>
-			<div class="match" id="match6" data-player1="seed11" data-player2="seed06" data-nextmatch="match15"></div>
-			<div class="match" id="match7" data-player1="seed07" data-player2="seed10" data-nextmatch="match16"></div>
-			<div class="match" id="match8" data-player1="seed15" data-player2="seed02" data-nextmatch="match16"></div>
+			<button class="match" id="match1" data-player1="seed01" data-player2="seed16" data-nextmatch="match13"></button>
+			<button class="match" id="match2" data-player1="seed09" data-player2="seed08" data-nextmatch="match13"></button>
+			<button class="match" id="match3" data-player1="seed05" data-player2="seed12" data-nextmatch="match14"></button>
+			<button class="match" id="match4" data-player1="seed13" data-player2="seed04" data-nextmatch="match14"></button>
+			<button class="match" id="match5" data-player1="seed03" data-player2="seed14" data-nextmatch="match15"></button>
+			<button class="match" id="match6" data-player1="seed11" data-player2="seed06" data-nextmatch="match15"></button>
+			<button class="match" id="match7" data-player1="seed07" data-player2="seed10" data-nextmatch="match16"></button>
+			<button class="match" id="match8" data-player1="seed15" data-player2="seed02" data-nextmatch="match16"></button>
 		</div>
 
 		<div class="round">
@@ -478,15 +477,15 @@
 		</div>
 
 		<div class="round round2">
-			<div class="match" id="match13" data-player1="match1" data-player2="match2" data-nextmatch="match21"></div>
-			<div class="match" id="match14" data-player1="match3" data-player2="match4" data-nextmatch="match21"></div>
-			<div class="match" id="match15" data-player1="match5" data-player2="match6" data-nextmatch="match22"></div>
-			<div class="match" id="match16" data-player1="match7" data-player2="match8" data-nextmatch="match22"></div>
+			<button class="match" id="match13" data-player1="match1" data-player2="match2" data-nextmatch="match21"></button>
+			<button class="match" id="match14" data-player1="match3" data-player2="match4" data-nextmatch="match21"></button>
+			<button class="match" id="match15" data-player1="match5" data-player2="match6" data-nextmatch="match22"></button>
+			<button class="match" id="match16" data-player1="match7" data-player2="match8" data-nextmatch="match22"></button>
 		</div>
 
 		<div class="round round3">
-			<div class="match" id="match21" data-player1="match13" data-player2="match14" data-nextmatch="match27"></div>
-			<div class="match" id="match22" data-player1="match15" data-player2="match16" data-nextmatch="match27"></div>
+			<button class="match" id="match21" data-player1="match13" data-player2="match14" data-nextmatch="match27"></button>
+			<button class="match" id="match22" data-player1="match15" data-player2="match16" data-nextmatch="match27"></button>
 		</div>
 
 		<div class="round">
@@ -494,7 +493,7 @@
 		</div>
 
 		<div class="round round4">
-			<div class="match" id="match27" data-player1="match21" data-player2="match22" data-nextmatch="match30"></div>
+			<button class="match" id="match27" data-player1="match21" data-player2="match22" data-nextmatch="match30"></button>
 		</div>
 
 		<div class="round">
@@ -503,14 +502,12 @@
 
 		<div class="round round5">
 			<div class="spacer"></div>
-			<div class="spacer"></div>
-			<div class="match" id="match30" data-player1="match27" data-player2="match29" data-nextmatch="match31"></div>
+			<button class="match" id="match30" data-player1="match27" data-player2="match29" data-nextmatch="match31"></button>
 		</div>
 
 		<div class="round round6">
 			<div class="spacer"></div>
-			<div class="spacer"></div>
-			<div class="match" id="match31" data-player1="match30" data-player2="L30" data-finalrank="1st"></div>
+			<button class="match" id="match31" data-player1="match30" data-player2="L30" data-finalrank="1st"></button>
 		</div>
 
 	</div>
@@ -521,83 +518,83 @@
 		</div>
 
 		<div class="round round1">
-			<div class="match" id="L1" data-nextmatch="match9"></div>
-			<div class="match" id="L2" data-nextmatch="match9"></div>
+			<button class="match" id="L1" data-nextmatch="match9"></button>
+			<button class="match" id="L2" data-nextmatch="match9"></button>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
-			<div class="match" id="L3" data-nextmatch="match10"></div>
-			<div class="match" id="L4" data-nextmatch="match10"></div>
+			<button class="match" id="L3" data-nextmatch="match10"></button>
+			<button class="match" id="L4" data-nextmatch="match10"></button>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
-			<div class="match" id="L5" data-nextmatch="match11"></div>
-			<div class="match" id="L6" data-nextmatch="match11"></div>
+			<button class="match" id="L5" data-nextmatch="match11"></button>
+			<button class="match" id="L6" data-nextmatch="match11"></button>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
-			<div class="match" id="L7" data-nextmatch="match12"></div>
-			<div class="match" id="L8" data-nextmatch="match12"></div>
+			<button class="match" id="L7" data-nextmatch="match12"></button>
+			<button class="match" id="L8" data-nextmatch="match12"></button>
 		</div>
 
 		<div class="round round2">
-			<div class="match" id="match9" data-player1="L1" data-player2="L2" data-nextmatch="match17"></div>
-			<div class="match" id="L16" data-nextmatch="match17"></div>
-			<div class="match" id="L15" data-nextmatch="match18"></div>
-			<div class="match" id="match10" data-player1="L3" data-player2="L4" data-nextmatch="match18"></div>
+			<button class="match" id="match9" data-player1="L1" data-player2="L2" data-nextmatch="match17"></button>
+			<button class="match" id="L16" data-nextmatch="match17"></button>
+			<button class="match" id="L15" data-nextmatch="match18"></button>
+			<button class="match" id="match10" data-player1="L3" data-player2="L4" data-nextmatch="match18"></button>
 			<div class="spacer"></div>
-			<div class="match" id="match11" data-player1="L5" data-player2="L6" data-nextmatch="match19"></div>
-			<div class="match" id="L14" data-nextmatch="match19"></div>
-			<div class="match" id="L13" data-nextmatch="match20"></div>
-			<div class="match" id="match12" data-player1="L7" data-player2="L8" data-nextmatch="match20"></div>
+			<button class="match" id="match11" data-player1="L5" data-player2="L6" data-nextmatch="match19"></button>
+			<button class="match" id="L14" data-nextmatch="match19"></button>
+			<button class="match" id="L13" data-nextmatch="match20"></button>
+			<button class="match" id="match12" data-player1="L7" data-player2="L8" data-nextmatch="match20"></button>
 		</div>
 
 		<div class="round round3">
-			<div class="match" id="match17" data-player1="match9" data-player2="L16" data-nextmatch="match23"></div>
+			<button class="match" id="match17" data-player1="match9" data-player2="L16" data-nextmatch="match23"></button>
 			<div class="spacer"></div>
-			<div class="match" id="match18" data-player1="match10" data-player2="L15" data-nextmatch="match23"></div>
+			<button class="match" id="match18" data-player1="match10" data-player2="L15" data-nextmatch="match23"></button>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
-			<div class="match" id="match19" data-player1="match11" data-player2="L14" data-nextmatch="match24"></div>
+			<button class="match" id="match19" data-player1="match11" data-player2="L14" data-nextmatch="match24"></button>
 			<div class="spacer"></div>
-			<div class="match" id="match20" data-player1="match12" data-player2="L13" data-nextmatch="match24"></div>
+			<button class="match" id="match20" data-player1="match12" data-player2="L13" data-nextmatch="match24"></button>
 		</div>
 
 		<div class="round round4">
-			<div class="match" id="match23" data-player1="match17" data-player2="match18" data-nextmatch="match25"></div>
+			<button class="match" id="match23" data-player1="match17" data-player2="match18" data-nextmatch="match25"></button>
 			<div class="spacer"></div>
-			<div class="match" id="L22" data-nextmatch="match25"></div>
-			<div class="match" id="L21" data-nextmatch="match26"></div>
+			<button class="match" id="L22" data-nextmatch="match25"></button>
+			<button class="match" id="L21" data-nextmatch="match26"></button>
 			<div class="spacer"></div>
-			<div class="match" id="match24" data-player1="match19" data-player2="match20" data-nextmatch="match26"></div>
+			<button class="match" id="match24" data-player1="match19" data-player2="match20" data-nextmatch="match26"></button>
 		</div>
 
 		<div class="round round5">
-			<div class="match" id="match25" data-player1="match23" data-player2="L22" data-nextmatch="match28"></div>
-			<div class="match" id="match26" data-player1="match24" data-player2="L21" data-nextmatch="match28"></div>
+			<button class="match" id="match25" data-player1="match23" data-player2="L22" data-nextmatch="match28"></button>
+			<button class="match" id="match26" data-player1="match24" data-player2="L21" data-nextmatch="match28"></button>
 		</div>
 
 		<div class="round round6">
-			<div class="match" id="L27" data-nextmatch="match29"></div>
-			<div class="match" id="match28" data-player1="match25" data-player2="match26" data-nextmatch="match29"></div>
+			<button class="match" id="L27" data-nextmatch="match29"></button>
+			<button class="match" id="match28" data-player1="match25" data-player2="match26" data-nextmatch="match29"></button>
 			<div class="spacer"></div>
 		</div>
 
 		<div class="round round7">
-			<div class="match" id="match29" data-player1="match28" data-player2="L27" data-nextmatch="match30"></div>
+			<button class="match" id="match29" data-player1="match28" data-player2="L27" data-nextmatch="match30"></button>
 			<div class="spacer"></div>
 		</div>
 
 		<div class="round round8">
-			<div class="match" id="L30" data-nextmatch="match31"></div>
+			<button class="match" id="L30" data-nextmatch="match31"></button>
 			<div class="spacer"></div>
-			<div class="match" id="L29" data-finalrank="3rd"></div>
-			<div class="match" id="L28" data-finalrank="4th"></div>
-			<div class="match" id="L26" data-finalrank="5th"></div>
-			<div class="match" id="L25" data-finalrank="6th"></div>
-			<div class="match" id="L24" data-finalrank="7th"></div>
-			<div class="match" id="L23" data-finalrank="8th"></div>
+			<button class="match" id="L29" data-finalrank="3rd"></button>
+			<button class="match" id="L28" data-finalrank="4th"></button>
+			<button class="match" id="L26" data-finalrank="5th"></button>
+			<button class="match" id="L25" data-finalrank="6th"></button>
+			<button class="match" id="L24" data-finalrank="7th"></button>
+			<button class="match" id="L23" data-finalrank="8th"></button>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
