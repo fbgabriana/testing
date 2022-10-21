@@ -164,6 +164,8 @@
 		constructor(id) {
 			this.id = id;
 		}
+		winner = {};
+		loser = {};
 		get element() {
 			return document.getElementById(this.id);
 		}
@@ -180,10 +182,7 @@
 			return this.element && tournament.matches[this.element.dataset.nextmatch] || null;
 		}
 		get losermatch() {
-			return tournament.matches[this.loserid] || null;
-		}
-		get loserid() {
-			return this.id.startsWith("match") && this.id.replace("match", "L") || "";
+			return tournament.matches[this.id.startsWith("match") && this.id.replace("match", "L")] || null;
 		}
 		get finalrank() {
 			return this.element && this.element.dataset.finalrank || "";
@@ -238,15 +237,8 @@
 			dialog.addEventListener("click", (event) => {
 				switch (event.target) {
 				case radio_player1:
-					this.playercode = this.player1.playercode;
-					this.text = this.player1.text;
-					this.title = `${this.id}: ${this.playercode}`;
-					if (this.losermatch) {
-						this.losermatch.playercode = this.player2.playercode;
-						this.losermatch.text = this.player2.text;
-						this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
-					}
-					console.log(`winner: ${this.text} (${this.playercode})`);
+					this.winner = this.player1;
+					this.loser = this.player2;
 					if (this.id == "match30") {
 						this.finalrank = "1st";
 						this.losermatch.finalrank = "2nd";
@@ -257,18 +249,12 @@
 						this.player2.finalrank = "2nd";
 					}
 					tournament.updateMatchInfo();
+					console.log(`winner: ${this.text} (${this.playercode})`);
 					dialog.close();
 					break;
 				case radio_player2:
-					this.playercode = this.player2.playercode;
-					this.text = this.player2.text;
-					this.title = `${this.id}: ${this.playercode}`;
-					if (this.losermatch) {
-						this.losermatch.playercode = this.player1.playercode;
-						this.losermatch.text = this.player1.text;
-						this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
-					}
-					console.log(`winner: ${this.text} (${this.playercode})`);
+					this.winner = this.player2;
+					this.loser = this.player1;
 					if (this.id == "match30") {
 						this.finalrank = "";
 						this.losermatch.finalrank = "";
@@ -279,18 +265,12 @@
 						this.player2.finalrank = "";
 					}
 					tournament.updateMatchInfo();
+					console.log(`winner: ${this.text} (${this.playercode})`);
 					dialog.close();
 					break;
 				case radio_nowinner:
-					this.playercode = this.id;
-					this.text = this.id;
-					this.title = "";
-					if (this.losermatch) {
-						this.losermatch.playercode = this.loserid;
-						this.losermatch.text = this.loserid;
-						this.losermatch.title = "";
-					}
-					console.log(`${radio_nowinner.labels[0].innerText}`);
+					this.winner = {};
+					this.loser = {};
 					if (this.id == "match30") {
 						this.finalrank = "";
 						this.losermatch.finalrank = "";
@@ -301,6 +281,7 @@
 						this.player2.finalrank = "";
 					}
 					tournament.updateMatchInfo();
+					console.log(`${radio_nowinner.labels[0].innerText}`);
 					dialog.close();
 					break;
 				case closebutton:
@@ -336,17 +317,18 @@
 		updateMatchInfo() {
 			for (let id in this.matches) {
 				let match = this.matches[id];
-				if (match.playercode == "") {
-					match.playercode = match.id;
-					match.text = match.id;
+				if (match.id.startsWith('match')) {
+					match.playercode = match.winner.playercode || match.id;
+					match.text = match.winner.text || match.id;
+					match.title = match.winner.playercode ? `${match.id}: ${match.winner.playercode}` : "";
+					if (match.losermatch) {
+						match.losermatch.playercode = match.loser.playercode || match.losermatch.id;
+						match.losermatch.text = match.loser.text || match.losermatch.id;
+						match.losermatch.title = match.loser.playercode ? `${match.losermatch.id}: ${match.loser.playercode}` : "";
+					}
 				}
 				if (match.title.startsWith(match.id)) {
-					if (match.element.dataset.finalrank) {
-						match.title = `${match.id}:${match.playercode} (${match.element.dataset.finalrank})`;
-					}
-					else {
-						match.title = `${match.id}:${match.playercode}`;
-					}
+					if (match.finalrank) match.title = `${match.title} (${match.finalrank})`;
 				}
 				if (match.text.startsWith('match')) {
 					match.style.fontWeight = "normal";
