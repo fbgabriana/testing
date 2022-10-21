@@ -347,7 +347,6 @@
 		drawNodes() {
 			const canvas = document.querySelector("canvas");
 			const brackets = document.querySelector(".brackets");
-
 			if (! canvas || ! canvas.getContext) return;
 
 			canvas.style.position = "absolute";
@@ -357,9 +356,7 @@
 			canvas.width  = brackets.offsetWidth;
 			canvas.style.zIndex = "-1";
 
-
 			const ctx = canvas.getContext('2d');
-
 			ctx.strokeStyle = "purple";
 			ctx.lineWidth = 1;
 			ctx.beginPath();
