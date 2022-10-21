@@ -147,7 +147,7 @@
 		margin: 1em 2em;
 		display: flex;
 		align-items: center;
-		font-size: 0.8rem;
+		font-size: 1.5em;
 	}
 	</style>
 
@@ -314,7 +314,7 @@
 		updateMatchInfo() {
 			for (let id in this.matches) {
 				let match = this.matches[id];
-				if (match.id.startsWith('match')) {
+				if (match.id.startsWith("match")) {
 					match.playercode = match.winner.playercode || match.id;
 					match.text = match.winner.text || match.id;
 					match.title = match.winner.playercode ? `${match.id}: ${match.winner.playercode}` : "";
@@ -327,7 +327,7 @@
 				if (match.title.startsWith(match.id)) {
 					if (match.finalrank) match.title = `${match.title} (${match.finalrank})`;
 				}
-				if (match.text.startsWith('match')) {
+				if (match.text.startsWith("match")) {
 					match.style.fontWeight = "normal";
 					match.style.color = "gray";
 				}
@@ -356,7 +356,7 @@
 			canvas.width  = brackets.offsetWidth;
 			canvas.style.zIndex = "-1";
 
-			const ctx = canvas.getContext('2d');
+			const ctx = canvas.getContext("2d");
 			ctx.strokeStyle = "purple";
 			ctx.lineWidth = 1;
 			ctx.beginPath();
