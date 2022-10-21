@@ -185,6 +185,12 @@
 		get loserid() {
 			return this.id.startsWith("match") && this.id.replace("match", "L") || "";
 		}
+		get finalrank() {
+			return this.element && this.element.dataset.finalrank || "";
+		}
+		set finalrank(string) {
+			if (this.element) this.element.dataset.finalrank = string;
+		}
 		get playercode() {
 			return this.element && this.element.dataset.playercode || "";
 		}
@@ -241,17 +247,16 @@
 						this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
 					}
 					console.log(`winner: ${this.text} (${this.playercode})`);
-					tournament.updateMatchInfo();
 					if (this.id == "match30") {
+						this.finalrank = "1st";
+						this.losermatch.finalrank = "2nd";
 						this.nextmatch.element.style.textDecoration = "purple wavy line-through";
-						this.title = `${this.id}: ${this.playercode} (1st Place)`;
-						this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode} (2nd Place)`;
 					}
 					if (this.id == "match31") {
-						this.title = `${this.id}: ${this.playercode} (1st Place)`;
-						this.player1.title = `${this.player1.id}: ${this.player1.playercode}`;
-						this.player2.title = `${this.player2.id}: ${this.player2.playercode} (2nd Place)`;
+						this.player1.finalrank = "";
+						this.player2.finalrank = "2nd";
 					}
+					tournament.updateMatchInfo();
 					dialog.close();
 					break;
 				case radio_player2:
@@ -264,15 +269,16 @@
 						this.losermatch.title = `${this.losermatch.id}: ${this.losermatch.playercode}`;
 					}
 					console.log(`winner: ${this.text} (${this.playercode})`);
-					tournament.updateMatchInfo();
 					if (this.id == "match30") {
+						this.finalrank = "";
+						this.losermatch.finalrank = "";
 						this.nextmatch.element.style.textDecoration = "none";
 					}
 					if (this.id == "match31") {
-						this.title = `${this.id}: ${this.playercode} (1st Place)`;
-						this.player1.title = `${this.player1.id}: ${this.player1.playercode} (2nd Place)`;
-						this.player2.title = `${this.player2.id}: ${this.player2.playercode}`;
+						this.player1.finalrank = "2nd";
+						this.player2.finalrank = "";
 					}
+					tournament.updateMatchInfo();
 					dialog.close();
 					break;
 				case radio_nowinner:
@@ -285,14 +291,16 @@
 						this.losermatch.title = "";
 					}
 					console.log(`${radio_nowinner.labels[0].innerText}`);
-					tournament.updateMatchInfo();
 					if (this.id == "match30") {
+						this.finalrank = "";
+						this.losermatch.finalrank = "";
 						this.nextmatch.element.style.textDecoration = "none";
 					}
 					if (this.id == "match31") {
-						this.player1.title = `${this.player1.id}: ${this.player1.playercode}`;
-						this.player2.title = `${this.player2.id}: ${this.player2.playercode}`;
+						this.player1.finalrank = "";
+						this.player2.finalrank = "";
 					}
+					tournament.updateMatchInfo();
 					dialog.close();
 					break;
 				case closebutton:
@@ -332,9 +340,12 @@
 					match.playercode = match.id;
 					match.text = match.id;
 				}
-				if (match.element.dataset.finalrank) {
-					if (match.title.startsWith(match.id)) {
+				if (match.title.startsWith(match.id)) {
+					if (match.element.dataset.finalrank) {
 						match.title = `${match.id}:${match.playercode} (${match.element.dataset.finalrank})`;
+					}
+					else {
+						match.title = `${match.id}:${match.playercode}`;
 					}
 				}
 				if (match.text.startsWith('match')) {
@@ -517,7 +528,7 @@
 		<div class="round round6">
 			<div class="spacer"></div>
 			<div class="spacer"></div>
-			<div class="match" id="match31" data-player1="match30" data-player2="L30"></div>
+			<div class="match" id="match31" data-player1="match30" data-player2="L30" data-finalrank="1st"></div>
 		</div>
 
 	</div>
@@ -599,12 +610,12 @@
 		<div class="round round8">
 			<div class="match" id="L30" data-nextmatch="match31"></div>
 			<div class="spacer"></div>
-			<div class="match" id="L29" data-finalrank="3rd Place"></div>
-			<div class="match" id="L28" data-finalrank="4th Place"></div>
-			<div class="match" id="L26" data-finalrank="5th Place"></div>
-			<div class="match" id="L25" data-finalrank="6th Place"></div>
-			<div class="match" id="L24" data-finalrank="7th Place"></div>
-			<div class="match" id="L23" data-finalrank="8th Place"></div>
+			<div class="match" id="L29" data-finalrank="3rd"></div>
+			<div class="match" id="L28" data-finalrank="4th"></div>
+			<div class="match" id="L26" data-finalrank="5th"></div>
+			<div class="match" id="L25" data-finalrank="6th"></div>
+			<div class="match" id="L24" data-finalrank="7th"></div>
+			<div class="match" id="L23" data-finalrank="8th"></div>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
 			<div class="spacer"></div>
