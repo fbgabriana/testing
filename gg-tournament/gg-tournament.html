@@ -382,9 +382,7 @@
 			}
 
 			for (let id in this.matches) {
-				if (id.startsWith("match")) {
-					drawNode(id);
-				}
+				if (id.startsWith("match")) drawNode(id);
 			}
 			ctx.stroke();
 		}
