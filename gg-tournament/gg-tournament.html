@@ -20,9 +20,6 @@
 		font-size: 1.75em;
 		margin: 0.5em 0;
 	}
-	canvas {
-		background-color: transparent;
-	}
 	.bracket {
 		display: flex;
 		flex-direction: row;
@@ -293,6 +290,9 @@
 			document.body.appendChild(dialog);
 			dialog.showModal();
 		}
+		rect() {
+			return this.element.getBoundingClientRect();
+		}
 	}
 
 	class Tournament {
@@ -348,15 +348,15 @@
 		}
 		drawNodes() {
 			const canvas = document.querySelector("canvas");
-			const brackets = document.querySelector(".brackets");
 			if (! canvas || ! canvas.getContext) return;
 
+			const brackets = document.querySelector(".brackets");
 			canvas.style.position = "absolute";
+			canvas.style.zIndex = "-1";
 			canvas.style.top = brackets.offsetTop + "px";
 			canvas.style.left = brackets.offsetLeft + "px";
 			canvas.height = brackets.offsetHeight;
-			canvas.width  = brackets.offsetWidth;
-			canvas.style.zIndex = "-1";
+			canvas.width = this.matches.match31.rect().right + scrollX;
 
 			const ctx = canvas.getContext("2d");
 			ctx.strokeStyle = "purple";
@@ -364,18 +364,18 @@
 			ctx.beginPath();
 
 			let drawNode = (match) => {
-				let offsetX = brackets.offsetLeft - scrollX;
-				let offsetY = brackets.offsetTop - scrollY;
-				let r0 = match.element.getBoundingClientRect();
-				let r1 = match.player1.element.getBoundingClientRect();
-				let r2 = match.player2.element.getBoundingClientRect();
-				let x1 = r1.right - offsetX;
-				let x2 = r2.right - offsetX;
+				let posX = scrollX - brackets.offsetLeft;
+				let posY = scrollY - brackets.offsetTop;
+				let r0 = match.rect();
+				let r1 = match.player1.rect();
+				let r2 = match.player2.rect();
+				let x1 = r1.right + posX;
+				let x2 = r2.right + posX;
 				let xm = Math.max(x1, x2);
-				let w  = r0.left - xm - offsetX;
-				let y0 = r0.bottom - r0.height/2 - offsetY;
-				let y1 = r1.bottom - r1.height/2 - offsetY;
-				let y2 = r2.bottom - r2.height/2 - offsetY;
+				let w  = r0.left - xm + posX;
+				let y0 = r0.bottom - r0.height/2 + posY;
+				let y1 = r1.bottom - r1.height/2 + posY;
+				let y2 = r2.bottom - r2.height/2 + posY;
 				ctx.moveTo(xm + w/2, y1); ctx.lineTo(xm + w/2, y2);
 				ctx.moveTo(xm + w/2, y0); ctx.lineTo(xm + w  , y0);
 				ctx.moveTo(x1      , y1); ctx.lineTo(xm + w/2, y1);
