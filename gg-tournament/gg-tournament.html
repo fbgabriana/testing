@@ -96,7 +96,7 @@
 		gap: 1em;
 	}
 	dialog::backdrop {
-		background-color: rgba(0, 0, 0, 0.4);
+		background-color: hsl(39.525, 33.3333%, 13.3333%, 0.25);
 	}
 	dialog {
 		position: fixed;
@@ -285,7 +285,7 @@
 				}
 			});
 			dialog.addEventListener("close", (event) => {
-				setTimeout(() => {document.body.removeChild(dialog)}, 60)
+				document.body.removeChild(dialog);
 			});
 			document.body.appendChild(dialog);
 			dialog.showModal();
