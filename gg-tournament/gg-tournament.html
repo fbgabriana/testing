@@ -98,46 +98,48 @@
 	.losers .round8 {
 		gap: 1em;
 	}
-	.get-match-winner {
-		display: block;
+	dialog::backdrop {
+		background-color: rgba(0, 0, 0, 0.4);
+	}
+	dialog {
 		position: fixed;
-		cursor: default;
-		font-size: 18px;
-		padding: 0.5em;
-		background-color: hsl(39.525, 66.6667%, 85.000%);;
 		border: 1px solid gray;
 		border-radius: 0.5em;
-		box-shadow: 0 1px 4px gray;
+		box-shadow: 0 1px 4px black;
+		padding: 0.5em;
+		background-color: hsl(39.525, 66.6667%, 80.000%);;
+		font-size: 18px;
+		cursor: default;
 		user-select: none;
 	}
-	.get-match-winner label {
+	dialog label {
 		padding-right: 0.5em;
 	}
-	.get-match-winner fieldset {
+	dialog fieldset {
 		border-radius: 0.5em;
 		margin-right: 0.5em;
 	}
-	.get-match-winner .closebutton {
+	dialog .closebutton {
 		position: absolute;
 		right: 0.25em;
 		top: 0.25em;
+		outline: none;
+		margin: 2px;
+		border: none;
+		padding: 0;
+		background-color: transparent;
 		font-size: 12px;
 		font-weight: bold;
-		margin: 2px;
-		padding: 0;
-		border: none;
-		background-color: transparent;
 		opacity: 0.8;
-		outline: none;
 	}
-	.get-match-winner .closebutton:hover {
+	dialog .closebutton:hover {
 		text-shadow: 0 0 1px gray;
 		opacity: 1.0;
 	}
-	.get-match-winner .closebutton:active {
-		text-shadow: 0 0 1px gray;
-		font-size: 10px;
+	dialog .closebutton:active {
 		padding: 0 1px 1px 0;
+		font-size: 10px;
+		text-shadow: 0 0 1px gray;
 		opacity: 1.0;
 	}
 	.settings {
