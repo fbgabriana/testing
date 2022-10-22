@@ -302,12 +302,12 @@
 				let id = elements[i].id;
 				matches[id] = new Match(id);
 				matches[id].title = matches[id].playercode;
-				if (typeof playerlist == "object") {
-					matches[id].text = playerlist[matches[id].playercode];
-				}
-				else {
-					matches[id].text = matches[id].playercode;
-				}
+				matches[id].text = (typeof playerlist == "object") ? playerlist[matches[id].playercode] : matches[id].playercode;
+				matches[id].element.addEventListener("click", (event) => {
+					if (event.target.id.startsWith("match")) {
+						matches[id].getMatchWinner();
+					}
+				});
 			}
 			return matches;
 		}
@@ -388,21 +388,10 @@
 			}
 			ctx.stroke();
 		}
-		#defineHandlers() {
-			for (let id in this.matches) {
-				let match = this.matches[id];
-				match.element.addEventListener("click", (event) => {
-					if (event.target.id.startsWith("match")) {
-						match.getMatchWinner();
-					}
-				});
-			}
-		}
 		initialize() {
 			this.matches = this.createAllMatches();
 			this.updateMatchInfo();
 			this.drawNodes();
-			this.#defineHandlers();
 			return this.matches;
 		}
 	}
