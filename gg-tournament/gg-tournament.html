@@ -146,9 +146,9 @@
 		position: absolute;
 		top: 0;
 		right: 0;
-		margin: 1em 2em;
 		display: flex;
 		align-items: center;
+		margin: 1em 2em;
 		font-size: 1.5em;
 	}
 	</style>
@@ -363,8 +363,7 @@
 			ctx.lineWidth = 1;
 			ctx.beginPath();
 
-			let drawNode = (id) => {
-				let match = this.matches[id];
+			let drawNode = (match) => {
 				let offsetX = brackets.offsetLeft - scrollX;
 				let offsetY = brackets.offsetTop - scrollY;
 				let r0 = match.element.getBoundingClientRect();
@@ -384,7 +383,7 @@
 			}
 
 			for (let id in this.matches) {
-				if (id.startsWith("match")) drawNode(id);
+				if (id.startsWith("match")) drawNode(this.matches[id]);
 			}
 			ctx.stroke();
 		}
