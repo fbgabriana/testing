@@ -1,4 +1,4 @@
-window.addEventListener("DOMContentLoaded", (event) => {
+window.addEventListener("DOMContentLoaded", event => {
 	fetch("template.html").then(response => {
 		return response.text();
 	}).then(str => {
