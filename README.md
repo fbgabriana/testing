@@ -1,4 +1,4 @@
-## [fbgabriana.github.io](https://fbgabriana.github.io/)
+## [fbgabriana.github.io](/) / [testing](/testing/)
 
 # Bamm's Testing Repository
 
