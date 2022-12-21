@@ -1,0 +1,21 @@
+#!/usr/bin/python3
+
+import sys
+import pandas as pd
+import matplotlib.pyplot as plt
+
+sys.tracebacklimit = 0
+
+filename = sys.argv[1]
+
+if len(sys.argv) > 2:
+	col = int(sys.argv[2])
+else:
+	col = 1
+
+if len(sys.argv):
+	datafile = pd.read_csv(filename, na_values=("NR", 0, "ND"), parse_dates=['Date_Time'])
+	numcols = len(datafile.columns)
+	if numcols > 13 and len(sys.argv) <= 2: col = 13
+	datafile.plot(0,col)
+	plt.show()
