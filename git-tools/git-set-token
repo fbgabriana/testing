@@ -1,7 +1,0 @@
-#!/bin/sh
-git config --global --unset credential.helper
-if git rev-parse 2>/dev/null; then
-	git config --local --unset credential.helper
-fi
-git config --global credential.helper "store"
-
