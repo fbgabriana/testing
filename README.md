@@ -2,7 +2,7 @@
 
 # Bamm's Testing Repository
 
-This is Bamm's repository for experimenting with how Github works.
+This is Bamm's repository for experimenting with Github.
 
 There is nothing of note here, and content may appear or disappear at any time.
 
